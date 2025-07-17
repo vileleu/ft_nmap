@@ -6,13 +6,13 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/17 14:00:32 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/17 14:05:11 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_nmap.h"
 
 int	main() {
-	printf("ft_nmap!\n");
+	printf("ft_nmap !\n");
 	return (0);
 }
