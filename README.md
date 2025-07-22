@@ -7,9 +7,12 @@ source : https://www.jedha.co/formation-cybersecurite/comment-fonctionne-nmap-gu
 
 
 ETAPES DE NMAP :
-- Énumération des cibles : identifie les adresses IP à scanner à partir de la cible spécifiée (IP, plage IP, nom de domaine, etc.).
+- (parsing) Énumération des cibles : identifie les adresses IP à scanner à partir de la cible spécifiée (IP, plage IP, nom de domaine, etc.).
+----
 - Détecte si chaque hôte est actif ou non : Utilise divers types de paquets (ICMP, TCP SYN, ACK, etc.) pour contourner les pare-feux.
+-----
 - Résolution DNS inverse 
+-----
 - Fonction principale de Nmap : Détecte les états des ports : ouvert, fermé, filtré, etc. Utilise différentes techniques de scan : TCP SYN (-sS)
 source : https://www.vaadata.com/blog/fr/nmap-loutil-pour-cartographier-et-evaluer-la-securite-dun-reseau/
 
@@ -25,9 +28,9 @@ SUJET :
 - Arguments à gérer :
 1) --help
 2) --ip
-3) --file	Fichier avec une liste d’IP/FQDN
-4) --ports	Plage ou liste de ports
-5) --speedup	Nombre de threads (0 à 250)
+3) --file	Fichier avec une liste d’IP/FQDN, format du fichier : Une IP par ligne.
+4) --ports	Plage ou liste de ports, permet de scanner un ou plusieurs ports spécifiques. Un seul port : 80, Une plage : 1-1000, Liste séparée par des virgules : 22,80,443
+5) --speedup	Nombre de threads (0 à 250), plus le nombre est élevé, plus le scan est rapide
 6) --scan	Type(s) de scan à effectuer : SYN, NULL, ACK, FIN, XMAS, UDP
 
 TO DO LIST :

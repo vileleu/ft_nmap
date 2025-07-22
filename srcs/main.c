@@ -12,28 +12,26 @@
 
 #include "ft_nmap.h"
 
-int	main() {
-	printf("ft_nmap\n");
-	return (0);
-}
-
-/*Pseudo-code global pour ft_nmap
-MAIN()
-{
-    parse_arguments(argc, argv);                    // --ip, --ports, --file, --scan, --speedup
-    resolve_targets();                              // Lire IP ou fichier, stocker les IPs
+// Pseudo-code pour ft_nmap
+int main(int argc, char **argv) {
+    parse_arguments(argc, argv);                 // 1. --ip, --ports, --file, --scan, --speedup
+    resolve_targets();                           // 2. Récupère la ou les IPs à scanner
     
-    init_scan_configuration();                      // Ports à scanner, types de scans, nombre de threads
-    load_services_database();                       // Pour associer les ports à des services (optionnel)
-
-    start_timer();                                  // Pour mesurer le temps du scan
-
+    check_host_availability();                   // 3. Ping / SYN / ACK pour voir si les hôtes sont UP
+    //perform_reverse_dns();                       // 4. Résolution DNS inverse (facultatif mais utile)
+    
+    init_scan_configuration();                   // 5. Configure ports, scan type, threads
+    load_services_database();                    // 6. Mappe les ports vers des services connus (optionnel)
+    
+    start_timer();                               // 7. Démarre le chrono
+    
     foreach target_ip in targets {
-        create_threads_for_target(target_ip);       // Crée des threads selon --speedup
+        create_threads_for_target(target_ip);    // 8. Lance les threads pour ce target
     }
 
-    wait_for_threads_to_finish();
-
-    stop_timer();
-    print_results();
-}*/
+    wait_for_threads_to_finish();                // 9. Attend la fin de tous les threads
+    
+    stop_timer();                                // 10. Stop chrono
+    print_results();                             // 11. Affiche les résultats
+    return 0;
+}
