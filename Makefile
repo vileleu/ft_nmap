@@ -6,7 +6,7 @@
 #    By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/17 13:36:31 by vileleu           #+#    #+#              #
-#    Updated: 2025/07/21 21:45:23 by vileleu          ###   ########.fr        #
+#    Updated: 2025/07/24 01:20:40 by vileleu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,8 @@ DIR_INCS	= includes
 DIR_OBJS	= objects
 DIR_DEPS 	= dependencies
 
-SRCS		=	main.c parsing.c utils_parsing.c
+SRCS		=	main.c \
+				parsing/parsing.c parsing/parsing_opt.c parsing/parsing_arg.c parsing/parsing_utils.c parsing/parsing_error.c
 
 INCS		= -I $(DIR_INCS)
 OBJS 		= $(patsubst %.c,$(DIR_OBJS)/%.o,$(SRCS))
@@ -32,23 +33,19 @@ DEPS 		= $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$(OBJS))
 
 NAME		= ft_nmap
 CC			= gcc
-CFLAGS		= -Wall -Wextra -Werror
+CFLAGS		= -Wall -Wextra -Werror -g3 -fsanitize=address
 OFLAGS		= -MMD -MP
 RM			= rm -rf
-MKDIR		= $(shell mkdir -p $(DIR_OBJS) $(DIR_DEPS))
-
-$(MKDIR)
+MKDIR		= $(shell mkdir -p $(DIR_OBJS)/parsing $(DIR_DEPS))
 
 $(DIR_OBJS)/%.o: $(DIR_SRCS)/%.c
 			@printf "\n$(BLUE)$< -> $(ORANGE)$@$(RESET)"
 			@$(CC) $(CFLAGS) $(OFLAGS) $(INCS) -c $< -o $@
 			@mv $(addsuffix .d,$(basename $@)) $(DIR_DEPS)
 
-$(NAME):	$(OBJS)
-			@printf "\n\n$(BLUE)Compiling $(LIBFT) ... $(RESET)"
-			@printf "$(GREEN)[✔]$(RESET)"
+$(NAME):	$(MKDIR) $(OBJS)
 			@printf "\n\n$(BLUE)Compiling $(NAME) ... $(RESET)"
-			@$(CC) $(CFLAGS) $(OBJS) $(INCS) $(LIBFT) -o $(NAME)
+			@$(CC) $(CFLAGS) $(OBJS) $(INCS) -o $(NAME)
 			@printf "$(GREEN)[✔]\n[$(NAME) done]$(RESET)\n\n"
 
 all:		 $(NAME)
@@ -64,8 +61,6 @@ clean:
 			@printf "$(GREEN) [✔]$(RESET)\n\n"
 
 fclean:		clean
-			@printf "$(BLUE)Delete $(LIBFT) ..."
-			@printf "$(GREEN) [✔]$(RESET)\n\n"
 			@printf "$(BLUE)Delete $(NAME) ..."
 			@$(RM) $(NAME)
 			@printf "$(GREEN) [✔]$(RESET)\n\n"
