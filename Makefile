@@ -6,7 +6,7 @@
 #    By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/17 13:36:31 by vileleu           #+#    #+#              #
-#    Updated: 2025/07/24 01:20:40 by vileleu          ###   ########.fr        #
+#    Updated: 2025/07/24 12:07:58 by vileleu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,24 +34,22 @@ DEPS 		= $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$(OBJS))
 NAME		= ft_nmap
 CC			= gcc
 CFLAGS		= -Wall -Wextra -Werror -g3 -fsanitize=address
-OFLAGS		= -MMD -MP
+OFLAGS		= -MMD -MP -MF $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$@)
 RM			= rm -rf
-MKDIR		= $(shell mkdir -p $(DIR_OBJS)/parsing $(DIR_DEPS))
 
 $(DIR_OBJS)/%.o: $(DIR_SRCS)/%.c
-			@printf "\n$(BLUE)$< -> $(ORANGE)$@$(RESET)"
+			@mkdir -p $(dir $@) $(patsubst $(DIR_OBJS)/%,$(DIR_DEPS)/%,$(dir $@))
+			@printf "\n$(BLUE)$< -> $(ORANGE)$@ $(BLUE)-> $(ORANGE)$(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$@)$(RESET)"
 			@$(CC) $(CFLAGS) $(OFLAGS) $(INCS) -c $< -o $@
-			@mv $(addsuffix .d,$(basename $@)) $(DIR_DEPS)
 
-$(NAME):	$(MKDIR) $(OBJS)
+$(NAME):	$(OBJS)
 			@printf "\n\n$(BLUE)Compiling $(NAME) ... $(RESET)"
 			@$(CC) $(CFLAGS) $(OBJS) $(INCS) -o $(NAME)
 			@printf "$(GREEN)[✔]\n[$(NAME) done]$(RESET)\n\n"
 
-all:		 $(NAME)
+-include	$(DEPS)
 
-restore_directory:
-			$(MKDIR)
+all:		 $(NAME)
 
 clean:
 			@printf "\n$(BLUE)Clean libraries ..."
@@ -65,6 +63,6 @@ fclean:		clean
 			@$(RM) $(NAME)
 			@printf "$(GREEN) [✔]$(RESET)\n\n"
 
-re:			fclean restore_directory all
+re:			fclean all
 
-.PHONY:		all restore_directory clean fclean re
+.PHONY:		all clean fclean re
