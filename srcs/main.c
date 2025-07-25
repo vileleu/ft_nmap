@@ -17,7 +17,7 @@ int resolve_targets(t_opt *opt, t_target targets[], int *target_count) {
     if (!opt || !targets || !target_count)
         return 0;
 
-		printf("------> IP parsing target = %s\n", targets[1].ip_str);
+	printf("------> IP parsing target = %s\n", targets[1].ip_str);
 
     int count = 0;
     for (uint32_t i = 0; i < opt->len_targets && count < MAX_TARGETS; i++) {
@@ -58,9 +58,9 @@ int main(const int ac, const char **av) {
 
     if (!resolve_targets(opt, targets, &target_count)) {
         fprintf(stderr, "Could not resolve targets.\n");
-		printf("----------> IP main = %s\n", targets->ip_str);
-		printf("----------> IP C main = %d\n", target_count);
-        free(opt);
+	printf("----------> IP main = %s\n", targets->ip_str);
+	printf("----------> IP C main = %d\n", target_count);
+        //free(opt);
         return 1;
     }
 
