@@ -52,7 +52,7 @@ TO DO LIST :
 - coder check_host_availability
 
 DERNIERES MODIFICATIONS : 
-- creation de la fonction de resolution + verification d'hote actif -> structure pour les ip resolues pour les utiliser partout dans le code
+- creation de la fonction de resolution
 - /!\ pas la meme fonction pour return les erreurs : problematiques ?
 - /!\ limite de 250 threads max, et 1 thread par IP dans le main + le fichier target.h pour eviter un malloc dans resolve_target
 - modification de get_otp dans parsing pour recup l'ip pour resolve_target
