@@ -11,6 +11,33 @@
 /* ************************************************************************** */
 
 #include "ft_nmap.h"
+#include "target.h"
+
+int resolve_targets(t_opt *opt, t_target targets[], int *target_count) {
+    if (!opt || !targets || !target_count)
+        return 0;
+
+		printf("------> IP parsing target = %s\n", targets[1].ip_str);
+
+    int count = 0;
+    for (uint32_t i = 0; i < opt->len_targets && count < MAX_TARGETS; i++) {
+        struct in_addr addr;
+        if (inet_pton(AF_INET, opt->targets[i], &addr) == 1) {
+            strncpy(targets[count].ip_str, opt->targets[i], INET_ADDRSTRLEN);
+            targets[count].ip_str[INET_ADDRSTRLEN - 1] = '\0';
+
+            // affiche ici la cible ajoutée
+            printf("------> IP parsing target = %s\n", targets[count].ip_str);
+
+            count++;
+        } else {
+            fprintf(stderr, "IP invalide ignorée : %s\n", opt->targets[i]);
+        }
+    }
+    *target_count = count;
+    return (count > 0);
+}
+
 
 void	print_opt(const char *name, t_opt *opt) {
 	printf("%s:\n", name);
@@ -20,15 +47,37 @@ void	print_opt(const char *name, t_opt *opt) {
 	printf("thread: %d\n", opt->thread);
 }
 
-int	main(const int ac, const char **av) {
-	t_opt		*opt;
+int main(const int ac, const char **av) {
+    t_opt *opt;
+    t_target targets[MAX_TARGETS];
+    int target_count = 0;
 
-	if (!(opt = parsing(av, ac)))
-		return (1);
-	print_opt(av[0] + 2, opt);
-	free(opt);
-	return (0);
+    if (!(opt = parsing(av, ac)))
+        return 1;
+    print_opt(av[0] + 2, opt);
+
+    if (!resolve_targets(opt, targets, &target_count)) {
+        fprintf(stderr, "Could not resolve targets.\n");
+		printf("----------> IP main = %s\n", targets->ip_str);
+		printf("----------> IP C main = %d\n", target_count);
+        free(opt);
+        return 1;
+    }
+
+    // for (int i = 0; i < target_count; i++) {
+    //     if (!check_host_availability(targets[i].ip_str)) {
+    //         printf("Host %s is unreachable.\n", targets[i].ip_str);
+    //     } else {
+    //         printf("Host %s is up.\n", targets[i].ip_str);
+    //     }
+    // }
+
+    free(opt);
+    return 0;
 }
+
+
+
 // // Pseudo-code pour ft_nmap
 // int main(int argc, char **argv) {
 //     parse_arguments(argc, argv);                 // 1. --ip, --ports, --file, --scan, --speedup

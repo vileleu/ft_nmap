@@ -9,9 +9,10 @@ source : https://www.jedha.co/formation-cybersecurite/comment-fonctionne-nmap-gu
 ETAPES DE NMAP :
 - (parsing) Énumération des cibles : identifie les adresses IP à scanner à partir de la cible spécifiée (IP, plage IP, nom de domaine, etc.).
 ----
+- Resolve target
+- Résolution DNS inverse (facultatif, bonus)
+----
 - Détecte si chaque hôte est actif ou non : Utilise divers types de paquets (ICMP, TCP SYN, ACK, etc.) pour contourner les pare-feux.
------
-- Résolution DNS inverse 
 -----
 - Fonction principale de Nmap : Détecte les états des ports : ouvert, fermé, filtré, etc. Utilise différentes techniques de scan : TCP SYN (-sS)
 source : https://www.vaadata.com/blog/fr/nmap-loutil-pour-cartographier-et-evaluer-la-securite-dun-reseau/
@@ -33,5 +34,27 @@ SUJET :
 5) --speedup	Nombre de threads (0 à 250), plus le nombre est élevé, plus le scan est rapide
 6) --scan	Type(s) de scan à effectuer : SYN, NULL, ACK, FIN, XMAS, UDP
 
+Visuel : 
+Args >    [ "192.168.1.1", "example.com" ]
+            ↓ (parsing)
+opt->targets = char **
+            ↓ (resolve_targets)
+t_target[]  = IP + sockaddr_in
+            ↓ (check_host_availability)
+             ping / SYN / ACK test
+            ↓
+         Port scans
+
+
 TO DO LIST :
-- continuer la documentation
+- revoir la logique dans get_otp
+- revoir la fonction resolve (/!\ ne pas oublier de l'adapter pour le futur --file)
+- coder check_host_availability
+
+DERNIERES MODIFICATIONS : 
+- creation de la fonction de resolution + verification d'hote actif -> structure pour les ip resolues pour les utiliser partout dans le code
+- /!\ pas la meme fonction pour return les erreurs : problematiques ?
+- /!\ limite de 250 threads max, et 1 thread par IP dans le main + le fichier target.h pour eviter un malloc dans resolve_target
+- modification de get_otp dans parsing pour recup l'ip pour resolve_target
+
+./ft_nmap --ports 20-30 --ip 1.1.1.1 --speedup 50

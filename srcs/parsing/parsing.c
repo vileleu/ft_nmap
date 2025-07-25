@@ -56,6 +56,22 @@ static uint8_t	get_opt(t_parse *parse) {
 	}
 	// --ip [address/host]
 	else if (!strcmp(parse->actual, "ip")) {
+		 //printf("------> IP parsing = %s\n", parse->next);
+		 //PROVISOIRE - juste pour les test
+		char **new_targets = realloc(parse->opt->targets, sizeof(char*) * (parse->opt->len_targets + 1));
+		if (!new_targets) {
+			fprintf(stderr, "Memory allocation failed\n");
+			return EXIT_FAILURE;
+		}
+		parse->opt->targets = new_targets;
+		parse->opt->targets[parse->opt->len_targets] = strdup(parse->next);
+		if (!parse->opt->targets[parse->opt->len_targets]) {
+			fprintf(stderr, "Memory allocation failed\n");
+			return EXIT_FAILURE;
+		}
+		parse->opt->len_targets++;
+		// printf pour debug
+		printf("------> IP parsing = %s\n", parse->next);
 	}
 	// --speedup [nb thread]
 	else if (!strcmp(parse->actual, "speedup")) {
