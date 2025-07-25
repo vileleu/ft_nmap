@@ -23,7 +23,7 @@ SUJET :
 3) ACK Scan	(-sA) : Envoie un paquet avec uniquement le drapeau ACK. Ne détermine pas si le port est ouvert, mais permet de détecter la présence d’un pare-feu
 4) FIN Scan	(-sF) : Envoie un paquet avec le drapeau FIN. Normalement, un port fermé renvoie un RST.
 5) XMAS Scan (-sX) : Envoie un paquet avec les drapeaux FIN, URG, et PSH (comme un "sapin de Noël allumé")
-6) UDP (-sU) : Envoie un paquet UDP vide. Si "Port unreachable" ICMP est reçu → fermé.
+6) UDP (-sU) : Envoie un paquet UDP vide. Si "Port unreachable" ICMP est reçu → fermé
 
 - Arguments à gérer :
 1) --help
