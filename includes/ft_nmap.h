@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/24 11:43:03 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/25 23:09:20 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,11 @@
 #define XMAS 5
 #define UDP 6
 
+typedef struct	s_list {
+	void			*data;
+	struct s_list	*next;
+}				t_list;
+
 typedef struct	s_port {
 	uint16_t	port;
 	uint8_t		isranged;
@@ -41,8 +46,7 @@ typedef struct	s_port {
 }				t_port;
 
 typedef struct	s_opt {
-	char		**targets;
-	uint32_t	len_targets;
+	t_list		*targets;
 	t_port		port;
 	uint8_t		thread;
 	uint8_t		scan[6];
@@ -53,5 +57,13 @@ typedef struct	s_opt {
 */
 
 t_opt			*parsing(const char **arg, const int len_arg);
+
+/*
+** UTILS FUNCTIONS
+*/
+
+void			print_opt(const char *name, t_opt *opt);
+void			free_list(t_list *list);
+void    		free_opt(t_opt *opt);
 
 #endif

@@ -12,10 +12,38 @@
 
 #include "parsing.h"
 
+uint8_t		get_opt_ip(t_parse *parse) {
+	t_get_arg	tmp;
+
+	tmp.list = NULL;
+	bzero(&tmp, sizeof(t_get_arg));
+	if ((parse->skip_next && (!parse->next || !*parse->next)) || (!parse->skip_next && !(*(parse->actual))))
+		return (error_parsing(parse, "ip option need 1 argument", parse->i));
+	if (parse->skip_next) {
+		if (get_string(&tmp, parse->next, ',')) {
+			free_list(tmp.list);
+			return (error_parsing(parse, "error malloc during ip option", parse->i));
+		}
+	}
+	else {
+		if (get_string(&tmp, parse->actual, ',')) {
+			free_list(tmp.list);
+			return (error_parsing(parse, "error malloc during ip option", parse->i));
+		}
+	}
+	if (parse->opt->targets)
+		last_list(parse->opt->targets)->next = tmp.list;
+	else
+		parse->opt->targets = tmp.list;
+	return (EXIT_SUCCESS);
+}
+
 uint8_t		get_opt_port(t_parse *parse) {
 	t_get_arg	tmp;
 
 	bzero(&tmp, sizeof(t_get_arg));
+	if ((parse->skip_next && (!parse->next || !*parse->next)) || (!parse->skip_next && !(*(parse->actual))))
+		return (error_parsing(parse, "port option need 1 argument", parse->i));
 	if (parse->port_ok)
 		return (error_parsing(parse, "1 option port is allowed", parse->i));
 	if (get_number(parse, &tmp, 1))
@@ -40,6 +68,8 @@ uint8_t		get_opt_thread(t_parse *parse) {
 	t_get_arg	tmp;
 
 	bzero(&tmp, sizeof(t_get_arg));
+	if ((parse->skip_next && (!parse->next || !*parse->next)) || (!parse->skip_next && !(*(parse->actual))))
+		return (error_parsing(parse, "speedup option need 1 argument", parse->i));
 	if (parse->thread_ok)
 		return (error_parsing(parse, "1 option speedup is allowed", parse->i));
 	if (get_number(parse, &tmp, 0))

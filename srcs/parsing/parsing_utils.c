@@ -36,11 +36,14 @@ t_ranged	atoi_ranged(const char *s) {
 uint8_t		str_isranged(const char *s) {
 	size_t	i = 0;
 	uint8_t	dash = 0;
+	uint8_t	check = 0;
 	
 	if (!s || !s[i])
 		return (0);
 	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
 		i++;
+	if (isdigit(s[i]))
+		check = 1;
 	while (isdigit(s[i]) || s[i] == '-') {
 		if (s[i] == '-' && !dash)
 			dash = 1;
@@ -50,13 +53,14 @@ uint8_t		str_isranged(const char *s) {
 	}
 	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
 		i++;
-	if (s[i] || !dash)
+	if (s[i] || !dash || !check)
 		return (0);
 	return (1);
 }
 
 uint8_t		str_isdigit(const char *s) {
 	size_t	i = 0;
+	uint8_t	check = 0;
 
 	if (!s || !s[i])
 		return (0);
@@ -64,11 +68,37 @@ uint8_t		str_isdigit(const char *s) {
 		i++;
 	if (s[i] == '-')
 		i++;
+	if (isdigit(s[i]))
+		check = 1;
 	while (isdigit(s[i]))
 		i++;
 	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
 		i++;
-	if (s[i])
+	if (s[i] || !check)
 		return (0);
 	return (1);
+}
+
+uint8_t		add_list(t_list **list, void *data) {
+	t_list	*new = NULL;
+	t_list	*tmp = *list;
+	
+	if (!(new = malloc(sizeof(t_list))))
+		return (EXIT_FAILURE);
+	new->data = data;
+	new->next = NULL;
+	if (!*list) {
+		*list = new;
+		return (EXIT_SUCCESS);
+	}
+	while (tmp->next)
+		tmp = tmp->next;
+	tmp->next = new;
+	return (EXIT_SUCCESS);
+}
+
+t_list		*last_list(t_list *list) {
+	while (list->next)
+		list = list->next;
+	return (list);
 }

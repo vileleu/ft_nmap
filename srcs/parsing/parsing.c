@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 17:49:08 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/24 01:04:23 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/25 23:06:43 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ static uint8_t	get_opt(t_parse *parse) {
 	}
 	// --ip [address/host]
 	else if (!strcmp(parse->actual, "ip")) {
+		if (get_opt_ip(parse))
+			return (EXIT_FAILURE);
 	}
 	// --speedup [nb thread]
 	else if (!strcmp(parse->actual, "speedup")) {
@@ -79,7 +81,9 @@ static uint8_t	get_shortopt(t_parse *parse) {
 	}
 	// ( -i [address/host] ) or ( -i[address/host] )
 	else if (!strncmp(parse->actual, "i", 1)) {
-		parse->actual += 1;
+		(*(parse->actual += 1)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
+		if (get_opt_ip(parse))
+			return (EXIT_FAILURE);
 	}
 	// ( -sp [nb thread] ) or ( -sp[nb thread] )
 	else if (!strncmp(parse->actual, "sp", 2)) {
@@ -101,9 +105,9 @@ t_opt			*parsing(const char **arg, const int len_arg) {
 	t_parse		*parse;
 	
 	if (!(opt = init_opt()))
-		return (error_parsing_malloc(arg[0]));
+		return (error_parsing_init(arg[0]));
 	if (!(parse = init_parse(arg, opt)))
-		return (error_parsing_malloc(arg[0]));
+		return (error_parsing_init(arg[0]));
 	parse->i = 1;
 	while (parse->i < len_arg) {
 		parse->skip_next = 0;

@@ -6,7 +6,7 @@
 #    By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/17 13:36:31 by vileleu           #+#    #+#              #
-#    Updated: 2025/07/24 12:07:58 by vileleu          ###   ########.fr        #
+#    Updated: 2025/07/25 23:13:23 by vileleu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ DIR_INCS	= includes
 DIR_OBJS	= objects
 DIR_DEPS 	= dependencies
 
-SRCS		=	main.c \
+SRCS		=	main.c utils.c \
 				parsing/parsing.c parsing/parsing_opt.c parsing/parsing_arg.c parsing/parsing_utils.c parsing/parsing_error.c
 
 INCS		= -I $(DIR_INCS)
