@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/25 23:09:20 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 21:58:12 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 
 #define MAX_PORT 65535
 #define MAX_THREAD 250
+
+#define MAX_SIZE_SCAN 6
 
 #define SYN 1
 #define NUL 2
@@ -59,11 +61,13 @@ typedef struct	s_opt {
 t_opt			*parsing(const char **arg, const int len_arg);
 
 /*
-** UTILS FUNCTIONS
+** OPT UTILS FUNCTIONS
 */
 
-void			print_opt(const char *name, t_opt *opt);
 void			free_list(t_list *list);
+uint8_t			add_list(t_list **list, void *data);
+t_list			*last_list(t_list *list);
 void    		free_opt(t_opt *opt);
+void			print_opt(const char *name, t_opt *opt);
 
 #endif

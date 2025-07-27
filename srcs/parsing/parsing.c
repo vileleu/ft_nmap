@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 17:49:08 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/25 23:06:43 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 20:52:25 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ static uint8_t	get_opt(t_parse *parse) {
 	}
 	// --scan [type of scan]
 	else if (!strcmp(parse->actual, "scan")) {
+		if (get_opt_scan(parse))
+			return (EXIT_FAILURE);
 	}
 	else
 		return (error_parsing(parse, "unknown option", parse->i));
@@ -93,7 +95,9 @@ static uint8_t	get_shortopt(t_parse *parse) {
 	}
 	// ( -sc [type of scan] ) or ( -sc[type of scan] )
 	else if (!strncmp(parse->actual, "sc", 2)) {
-		parse->actual += 2;
+		(*(parse->actual += 2)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
+		if (get_opt_scan(parse))
+			return (EXIT_FAILURE);
 	}
 	else
 		return (error_parsing(parse, "unknown option", parse->i));

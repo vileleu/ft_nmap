@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 21:44:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/24 01:03:56 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 21:02:31 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,26 +79,13 @@ uint8_t		str_isdigit(const char *s) {
 	return (1);
 }
 
-uint8_t		add_list(t_list **list, void *data) {
-	t_list	*new = NULL;
-	t_list	*tmp = *list;
-	
-	if (!(new = malloc(sizeof(t_list))))
-		return (EXIT_FAILURE);
-	new->data = data;
-	new->next = NULL;
-	if (!*list) {
-		*list = new;
-		return (EXIT_SUCCESS);
-	}
-	while (tmp->next)
-		tmp = tmp->next;
-	tmp->next = new;
-	return (EXIT_SUCCESS);
-}
+uint8_t		same_scan(uint8_t *scan, uint8_t check) {
+	uint8_t	i = 0;
 
-t_list		*last_list(t_list *list) {
-	while (list->next)
-		list = list->next;
-	return (list);
+	while (i < MAX_SIZE_SCAN) {
+		if (scan[i] == check)
+			return (1);
+		i++;
+	}
+	return (0);
 }
