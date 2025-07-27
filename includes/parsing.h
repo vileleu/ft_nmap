@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/24 00:15:38 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 21:03:12 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 23:08:40 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ typedef struct	s_parse {
 	uint8_t		scan_ok;
 	uint8_t		i;
 	uint8_t		is_ranged;
+	uint8_t		is_list;
 	uint8_t		skip_next;
 }				t_parse;
 
@@ -62,13 +63,15 @@ uint8_t			get_opt_ip(t_parse *parse);
 uint8_t			get_opt_thread(t_parse *parse);
 uint8_t			get_opt_scan(t_parse *parse);
 
-uint8_t			get_scan(t_parse *parse, const char *s, char c, uint8_t j);
-uint8_t			get_string(t_get_arg *tmp, const char *s, const char c);
-uint8_t			get_number(t_parse *parse, t_get_arg *tmp, const uint8_t canbe_ranged);
+uint8_t			get_scan(t_parse *parse, const char *s, uint8_t j);
+uint8_t			get_string(t_parse *parse, t_get_arg *tmp, const char *s);
+uint8_t			get_number(t_parse *parse, t_get_arg *tmp, const uint8_t canbe_ranged, const uint8_t canbe_list);
 
 t_ranged		atoi_ranged(const char *s);
+t_list			*atoi_list(t_get_arg *tmp, const char *s);
 uint8_t			str_isranged(const char *s);
 uint8_t			str_isdigit(const char *s);
+uint8_t			str_islist(const char *s);
 uint8_t			same_scan(uint8_t *scan, uint8_t check);
 
 #endif

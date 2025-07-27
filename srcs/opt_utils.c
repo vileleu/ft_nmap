@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 23:07:01 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 17:13:01 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 23:30:33 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,18 +49,35 @@ t_list		*last_list(t_list *list) {
 
 void    free_opt(t_opt *opt) {
     free_list(opt->targets);
+	if (opt->port.islist)
+		free_list(opt->port.list);
     free(opt);
 }
 
 void	print_opt(const char *name, t_opt *opt) {
-	t_list	*tmp = opt->targets;
+	t_list	*tmp = NULL;
 	uint8_t	i = 0;
 
 	printf("%s:\n", name);
 	// port
-	(opt->port.isranged ? printf("port: %d-%d\n", opt->port.min, opt->port.max) : printf("port: %d\n", opt->port.port));
+	if (opt->port.isranged)
+		printf("port: %d-%d", opt->port.min, opt->port.max);
+	else if (opt->port.islist) {
+		tmp = opt->port.list;
+		printf("port: ");
+		while (tmp) {
+			printf("|%hu|", (*(uint16_t *)tmp->data));
+			tmp = tmp->next;
+			if (tmp)
+				printf(" ");
+		}
+	}
+	else
+		printf("port: %d", opt->port.port);
+	printf("\n");
 	// ip/host
 	printf("targets: ");
+	tmp = opt->targets;
 	while (tmp) {
 		printf("|%s|", (char *)tmp->data);
 		tmp = tmp->next;

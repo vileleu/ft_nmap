@@ -6,16 +6,16 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/24 01:03:04 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 22:08:23 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 23:08:52 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parsing.h"
 
-uint8_t		get_scan(t_parse *parse, const char *s, char c, uint8_t j) {
+uint8_t		get_scan(t_parse *parse, const char *s, uint8_t j) {
 	int32_t	i = 0;
 	
-	while (s[i] && s[i] != c)
+	while (s[i] && s[i] != SEPARATOR_STR)
 		i++;
 	if (i) {
 		if (i == 3 && !strncmp(s, "SYN", 3))
@@ -34,44 +34,43 @@ uint8_t		get_scan(t_parse *parse, const char *s, char c, uint8_t j) {
 			return (EXIT_FAILURE);
 	}
 	if (s[i])
-		return (get_scan(parse, s + i + 1, c, j));
+		return (get_scan(parse, s + i + 1, j));
 	return (EXIT_SUCCESS);
 }
 
-uint8_t		get_string(t_get_arg *tmp, const char *s, const char c) {
+uint8_t		get_string(t_parse *parse, t_get_arg *tmp, const char *s) {
 	char		*data = NULL;
 	uint32_t	i = 0;
 
-	while (s[i] && s[i] != c)
+	while (s[i] && s[i] != SEPARATOR_STR)
 		i++;
 	if (i) {
 		if (!(data = strndup(s, i)))
-			return (EXIT_FAILURE);
+			return (error_parsing(parse, "error malloc while get string", parse->i + parse->skip_next));
 		if (add_list(&tmp->list, data))
-			return (EXIT_FAILURE);
+			return (error_parsing(parse, "error malloc while get string", parse->i + parse->skip_next));
 	}
 	if (s[i])
-		return (get_string(tmp, s + i + 1, c));
+		return (get_string(parse, tmp, s + i + 1));
 	return (EXIT_SUCCESS);
 }
 
-uint8_t		get_number(t_parse *parse, t_get_arg *tmp, const uint8_t canbe_ranged) {
-	if (canbe_ranged) {
-		if (!parse->skip_next && str_isranged(parse->actual)) {
-			parse->is_ranged = 1;
-			tmp->ranged = atoi_ranged(parse->actual);
-			return (EXIT_SUCCESS);
-		}
-		else if (parse->skip_next && str_isranged(parse->next)) {
-			parse->is_ranged = 1;
-			tmp->ranged = atoi_ranged(parse->next);
-			return (EXIT_SUCCESS);
-		}
+uint8_t		get_number(t_parse *parse, t_get_arg *tmp, const uint8_t canbe_ranged, const uint8_t canbe_list) {
+	const char	*s = (parse->skip_next ? parse->next : parse->actual);
+
+	if (canbe_ranged && str_isranged(s)) {
+		parse->is_ranged = 1;
+		tmp->ranged = atoi_ranged(s);
+		return (EXIT_SUCCESS);
 	}
-	if (!parse->skip_next && str_isdigit(parse->actual))
-		tmp->nb = atoi(parse->actual);
-	else if (parse->skip_next && str_isdigit(parse->next))
-		tmp->nb = atoi(parse->next);
+	else if (canbe_list && str_islist(s)) {
+		parse->is_list = 1;
+		if (!(atoi_list(tmp, s)))
+			return (error_parsing(parse, "error malloc while get number", parse->i + parse->skip_next));
+		return (EXIT_SUCCESS);
+	}
+	if (str_isdigit(s))
+		tmp->nb = atoi(s);
 	else
 		return (error_parsing(parse, "wrong format", parse->i + parse->skip_next));
 	return (EXIT_SUCCESS);

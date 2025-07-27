@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 21:44:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 21:02:31 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 23:34:22 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,34 @@ t_ranged	atoi_ranged(const char *s) {
 	return (ranged);
 }
 
+t_list		*atoi_list(t_get_arg *tmp, const char *s) {
+	size_t		i = 0;
+	uint16_t	*data;
+	uint16_t	nb;
+
+	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
+		i++;
+	while (s[i] || s[i] == SEPARATOR_STR || isdigit(s[i])) {
+		while (s[i] == SEPARATOR_STR)
+			i++;
+		if (isdigit(s[i])) {
+			while (isdigit(s[i]))
+				nb = nb * 10 + (s[i++] - '0');
+			if (!(data = malloc(sizeof(uint16_t))))
+				return (NULL);
+			*data = nb;
+			if (add_list(&tmp->list, data))
+				return (NULL);
+			nb = 0;
+		}
+	}
+	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
+		i++;
+	if (s[i])
+		return (NULL);
+	return (tmp->list);
+}
+
 uint8_t		str_isranged(const char *s) {
 	size_t	i = 0;
 	uint8_t	dash = 0;
@@ -42,8 +70,8 @@ uint8_t		str_isranged(const char *s) {
 		return (0);
 	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
 		i++;
-	if (isdigit(s[i]))
-		check = 1;
+	if (isdigit(s[i]) || isdigit(s[i + 1]))
+			check = 1;
 	while (isdigit(s[i]) || s[i] == '-') {
 		if (s[i] == '-' && !dash)
 			dash = 1;
@@ -58,6 +86,29 @@ uint8_t		str_isranged(const char *s) {
 	return (1);
 }
 
+uint8_t		str_islist(const char *s) {
+	size_t	i = 0;
+	uint8_t	sep = 0;
+	uint8_t	check = 0;
+
+	if (!s || !s[i])
+		return (0);
+	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
+		i++;
+	while (isdigit(s[i]) || s[i] == SEPARATOR_STR) {
+		if (s[i] == SEPARATOR_STR)
+			sep = 1;
+		if (isdigit(s[i]))
+			check = 1;
+		i++;
+	}
+	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
+		i++;
+	if (s[i] || !check || !sep)
+		return (0);
+	return (1);
+}
+
 uint8_t		str_isdigit(const char *s) {
 	size_t	i = 0;
 	uint8_t	check = 0;
@@ -65,8 +116,6 @@ uint8_t		str_isdigit(const char *s) {
 	if (!s || !s[i])
 		return (0);
 	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
-		i++;
-	if (s[i] == '-')
 		i++;
 	if (isdigit(s[i]))
 		check = 1;
@@ -78,6 +127,8 @@ uint8_t		str_isdigit(const char *s) {
 		return (0);
 	return (1);
 }
+
+
 
 uint8_t		same_scan(uint8_t *scan, uint8_t check) {
 	uint8_t	i = 0;

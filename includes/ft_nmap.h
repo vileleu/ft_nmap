@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 21:58:12 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/27 22:24:40 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ typedef struct	s_port {
 	uint8_t		isranged;
 	uint16_t	min;
 	uint16_t	max;
+	uint8_t		islist;	
+	t_list		*list;
 }				t_port;
 
 typedef struct	s_opt {
