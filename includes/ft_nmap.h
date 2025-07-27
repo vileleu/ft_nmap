@@ -21,6 +21,10 @@
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/ip_icmp.h>
+#include <netinet/in.h>
+#include <time.h>
 
 #define MAX_RANGE_SCAN 1024
 

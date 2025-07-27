@@ -13,29 +13,92 @@
 #include "ft_nmap.h"
 #include "target.h"
 
-int resolve_targets(t_opt *opt, t_target targets[], int *target_count) {
-    if (!opt || !targets || !target_count)
+#include <netinet/ip_icmp.h> //pour macOS
+
+unsigned short checksum(void *buf, int len) {
+	unsigned short *ptr = buf;
+	unsigned int sum = 0;
+
+	for (; len > 1; len -= 2)
+		sum += *ptr++;
+	if (len == 1)
+		sum += *(unsigned char*)ptr;
+
+	sum = (sum >> 16) + (sum & 0xFFFF);
+	sum += (sum >> 16);
+	return (unsigned short)(~sum);
+}
+
+int check_host_availability(const char *ip_str) {
+	int sockfd;
+	struct sockaddr_in addr;
+	struct icmp icmp_hdr;
+	char packet[64];
+
+	// ouvre un raw socket en mode ICMP
+	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+		perror("socket");
+		return 0;
+	}
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	if (inet_pton(AF_INET, ip_str, &addr.sin_addr) != 1) {
+		fprintf(stderr, "Invalid IP address: %s\n", ip_str);
+		close(sockfd);
+		return 0;
+	}
+
+	// ICMP header
+	memset(&icmp_hdr, 0, sizeof(icmp_hdr));
+	icmp_hdr.icmp_type = ICMP_ECHO;
+	icmp_hdr.icmp_code = 0;
+	icmp_hdr.icmp_id = getpid() & 0xFFFF;
+	icmp_hdr.icmp_seq = 1;
+
+	// Payload (simple string)
+	const char *payload = "ft_nmap_ping";
+	memcpy(packet, &icmp_hdr, sizeof(icmp_hdr));
+	strcpy(packet + sizeof(icmp_hdr), payload);
+
+	int packet_size = sizeof(icmp_hdr) + strlen(payload);
+	icmp_hdr.icmp_cksum = checksum(packet, packet_size);
+	memcpy(packet, &icmp_hdr, sizeof(icmp_hdr));
+
+	if (sendto(sockfd, packet, packet_size, 0,
+	           (struct sockaddr *)&addr, sizeof(addr)) <= 0) {
+		perror("sendto");
+		close(sockfd);
+		return 0;
+	}
+
+	struct timeval timeout = {1, 0};
+	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+	char recv_buf[1024];
+	socklen_t addr_len = sizeof(addr);
+	ssize_t bytes_received = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0,
+	                                  (struct sockaddr *)&addr, &addr_len);
+	close(sockfd);
+
+	return (bytes_received > 0);
+}
+
+
+int resolve_target(t_opt *opt, t_target *target) {
+    if (!opt || !target)
+        return 0;
+    if (opt->len_targets == 0 || !opt->targets[0])
         return 0;
 
-		printf("------> IP parsing target = %s\n", targets[1].ip_str);
-
-    int count = 0;
-    for (uint32_t i = 0; i < opt->len_targets && count < MAX_TARGETS; i++) {
-        struct in_addr addr;
-        if (inet_pton(AF_INET, opt->targets[i], &addr) == 1) {
-            strncpy(targets[count].ip_str, opt->targets[i], INET_ADDRSTRLEN);
-            targets[count].ip_str[INET_ADDRSTRLEN - 1] = '\0';
-
-            // affiche ici la cible ajoutée
-            printf("------> IP parsing target = %s\n", targets[count].ip_str);
-
-            count++;
-        } else {
-            fprintf(stderr, "IP invalide ignorée : %s\n", opt->targets[i]);
-        }
+    struct in_addr addr;
+    if (inet_pton(AF_INET, opt->targets[0], &addr) == 1) {
+        strncpy(target->ip_str, opt->targets[0], INET_ADDRSTRLEN);
+        target->ip_str[INET_ADDRSTRLEN - 1] = '\0';
+        printf("Target IP Address: %s\n", target->ip_str);
+        return 1;
     }
-    *target_count = count;
-    return (count > 0);
+    return 0;
 }
 
 
@@ -49,21 +112,24 @@ void	print_opt(const char *name, t_opt *opt) {
 
 int main(const int ac, const char **av) {
     t_opt *opt;
-    t_target targets[MAX_TARGETS];
-    int target_count = 0;
+    t_target	target;
 
     if (!(opt = parsing(av, ac)))
         return 1;
     print_opt(av[0] + 2, opt);
 
-    if (!resolve_targets(opt, targets, &target_count)) {
+    if (!resolve_target(opt, &target)) {
         fprintf(stderr, "Could not resolve targets.\n");
-		printf("----------> IP main = %s\n", targets->ip_str);
-		printf("----------> IP C main = %d\n", target_count);
         free(opt);
         return 1;
     }
 
+    if (!check_host_availability(target.ip_str)) {
+		printf("Host %s is unreachable.\n", target.ip_str);
+	} else {
+		printf("Host %s is up.\n", target.ip_str);
+	}
+    // logique pour la future gestion des multiples IP
     // for (int i = 0; i < target_count; i++) {
     //     if (!check_host_availability(targets[i].ip_str)) {
     //         printf("Host %s is unreachable.\n", targets[i].ip_str);

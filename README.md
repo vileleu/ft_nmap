@@ -12,13 +12,15 @@ ETAPES DE NMAP :
 - Resolve target
 - Résolution DNS inverse (facultatif, bonus)
 ----
-- Détecte si chaque hôte est actif ou non : Utilise divers types de paquets (ICMP, TCP SYN, ACK, etc.) pour contourner les pare-feux.
+- Détecte si chaque hôte est actif ou non
 -----
-- Fonction principale de Nmap : Détecte les états des ports : ouvert, fermé, filtré, etc. Utilise différentes techniques de scan : TCP SYN (-sS)
+- Fonction principale de Nmap : Détecte les états des ports : ouvert, fermé, filtré, etc. Utilise différentes techniques de scan
 source : https://www.vaadata.com/blog/fr/nmap-loutil-pour-cartographier-et-evaluer-la-securite-dun-reseau/
+
 
 SUJET :
 - Scan à implementer :
+Chacun sert à scanner des ports sur une machine déjà détectée comme active.
 1) SYN (-sS) : envoie un paquet SYN, attend SYN-ACK pour détecter un port ouvert
 2) NULL Scan (-sN) : Envoie un paquet sans aucun drapeau 
 3) ACK Scan	(-sA) : Envoie un paquet avec uniquement le drapeau ACK. Ne détermine pas si le port est ouvert, mais permet de détecter la présence d’un pare-feu
@@ -34,7 +36,7 @@ SUJET :
 5) --speedup	Nombre de threads (0 à 250), plus le nombre est élevé, plus le scan est rapide
 6) --scan	Type(s) de scan à effectuer : SYN, NULL, ACK, FIN, XMAS, UDP
 
-Visuel : 
+VISUEL ARGUMENTS : 
 Args >    [ "192.168.1.1", "example.com" ]
             ↓ (parsing)
 opt->targets = char **
@@ -47,14 +49,26 @@ t_target[]  = IP + sockaddr_in
 
 
 TO DO LIST :
-- revoir la logique dans get_otp
-- revoir la fonction resolve (/!\ ne pas oublier de l'adapter pour le futur --file)
-- coder check_host_availability
+- ✅ revoir la logique dans get_otp
+- ✅ revoir la fonction resolve (/!\ ne pas oublier de l'adapter apres pour le futur --file)
+- ✅ coder check_host_availability
+- gerer les hostnames -> resolve_target
+- decouper check_host_availability -> trop longue
+- mettre les fonctions dans des fichiers pour ne pas tous mettre dans main.c
 
 DERNIERES MODIFICATIONS : 
-- creation de la fonction de resolution + verification d'hote actif -> structure pour les ip resolues pour les utiliser partout dans le code
-- /!\ pas la meme fonction pour return les erreurs : problematiques ?
-- /!\ limite de 250 threads max, et 1 thread par IP dans le main + le fichier target.h pour eviter un malloc dans resolve_target
-- modification de get_otp dans parsing pour recup l'ip pour resolve_target
+- creation de la fonction de resolution de l'IP
+- /!\ pas la meme fonction pour return les erreurs : problematique ?
+- /!\ limite de 250 threads max, et 1 thread par IP dans le main + le fichier target.h
+- modification de get_otp dans parsing pour recup l'ip pour resolve_target avec un malloc temporaire, comme il y a une seule IP a recuperer quand il n'y a pas d'option --file pas de boucle et tableau d'IP
+- /!\ pour l'instant logique  pour 1 seule IP mais facilement adaptable quand l'option --file sera geree
+- /!\ bibliotheque sur macOS, travailler sur la VM, ne pas oublier de faire les modifs pour Linux /!\
 
-./ft_nmap --ports 20-30 --ip 1.1.1.1 --speedup 50
+
+DOC fonction - check_host_availability :
+- Fonction pour détecter si chaque hôte est actif/joignable ou non : ici j'utilise le ping classique ICMP
+- methode : ouvre un raw socket en mode ICMP, construis un paquet ICMP Echo Request, envoies à l’IP cible, attends une réponse (ICMP Echo Reply), i reçue dans la limite timeout → hôte actif, sinon → pas actif
+
+
+
+sudo ./ft_nmap --ports 20-30 --ip 1.1.1.1 --speedup 50
