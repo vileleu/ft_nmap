@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/28 15:13:36 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 22:49:38 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 23:19:45 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ uint8_t		add_list(t_list **list, uint16_t *data) {
 		new->next = tmp;
 		return (EXIT_SUCCESS);
 	}
-    while (*data > *tmp->data) {
+    while (tmp && *data > *tmp->data) {
         save = tmp;
 	    tmp = tmp->next;
     }
@@ -116,6 +116,15 @@ uint8_t		str_islist_nb(const char *s) {
 	if (s[i] || !check || !sep)
 		return (0);
 	return (1);
+}
+
+uint8_t     same_list_addr(t_list_addr *list, char *host) {
+    while (list) {
+        if (!strcmp(list->data, host))
+            return (1);
+        list = list->next;
+    }
+    return (0);
 }
 
 uint8_t     same_list_nb(t_list *list, uint16_t nb) {

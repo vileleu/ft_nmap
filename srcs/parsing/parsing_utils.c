@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 21:44:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 23:09:55 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 23:26:35 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ uint8_t		str_ishost(t_parse *parse, t_list_addr *list, char *host) {
 	bzero(&hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
 	if ((ret = getaddrinfo(host, NULL, &hints, &res)))
-		return error_parsing_example(parse, host, gai_strerror(ret), parse->i + parse->skip_next);
+		return error_parsing_host(parse, host, gai_strerror(ret), parse->i + parse->skip_next);
 	else {
 		list->addr = *(struct sockaddr_in *)res->ai_addr;
 		freeaddrinfo(res);

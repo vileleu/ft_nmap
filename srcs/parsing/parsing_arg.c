@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/24 01:03:04 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 22:52:00 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 23:51:47 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,14 @@ uint8_t		get_string(t_parse *parse, t_get_arg *tmp, const char *s) {
 	while (s[i] && s[i] != SEPARATOR_STR)
 		i++;
 	if (i) {
-		if (!(data = strndup(s, i)) || !(list = add_list_addr(&tmp->un.list_addr, data)))
+		if (!(data = strndup(s, i)))
+			return (error_parsing(parse, "error malloc while get string", parse->i + parse->skip_next));
+		if (same_list_addr(parse->opt->targets, data)) {
+			error_parsing_host(parse, data, "same host is not allowed", parse->i + parse->skip_next);
+			free(data);
+			return (EXIT_FAILURE);
+		}
+		if (!(list = add_list_addr(&tmp->un.list_addr, data)))
 			return (error_parsing(parse, "error malloc while get string", parse->i + parse->skip_next));
 		if (str_ishost(parse, list, data))
 			return (EXIT_FAILURE);
@@ -90,8 +97,13 @@ uint8_t		get_file(t_parse *parse, const char *s) {
 		if (*buffer != '\n')
 			tmp = ft_strjoin(tmp, buffer);
 		if (tmp && memchr(buffer, '\n', BUFFER_SIZE)) {
+			if (same_list_addr(parse->opt->targets, tmp)) {
+				error_parsing_host(parse, tmp, "same host is not allowed", parse->i + parse->skip_next);
+				free(tmp);
+				return (EXIT_FAILURE);
+			}
 			if (!(data = strdup(tmp)) || !(list = add_list_addr(&parse->opt->targets, data))) {
-				(tmp ? free(tmp) : (void)0);
+				free(tmp);
 				return (error_parsing(parse, "error malloc while get file", parse->i + parse->skip_next));
 			}
 			free(tmp);
@@ -101,8 +113,13 @@ uint8_t		get_file(t_parse *parse, const char *s) {
 		}
 	}	
 	if (tmp) {
+		if (same_list_addr(parse->opt->targets, tmp)) {
+			error_parsing_host(parse, tmp, "same host is not allowed", parse->i + parse->skip_next);
+			free(tmp);
+			return (EXIT_FAILURE);
+		}
 		if (!(data = strdup(tmp)) || !(list = add_list_addr(&parse->opt->targets, data))) {
-			(tmp ? free(tmp) : (void)0);
+			free(tmp);
 			return (error_parsing(parse, "error malloc while get file", parse->i + parse->skip_next));
 		}
 		free(tmp);
