@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 21:44:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 23:34:22 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 22:56:32 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,34 +31,6 @@ t_ranged	atoi_ranged(const char *s) {
 	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
 		i++;
 	return (ranged);
-}
-
-t_list		*atoi_list(t_get_arg *tmp, const char *s) {
-	size_t		i = 0;
-	uint16_t	*data;
-	uint16_t	nb;
-
-	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
-		i++;
-	while (s[i] || s[i] == SEPARATOR_STR || isdigit(s[i])) {
-		while (s[i] == SEPARATOR_STR)
-			i++;
-		if (isdigit(s[i])) {
-			while (isdigit(s[i]))
-				nb = nb * 10 + (s[i++] - '0');
-			if (!(data = malloc(sizeof(uint16_t))))
-				return (NULL);
-			*data = nb;
-			if (add_list(&tmp->list, data))
-				return (NULL);
-			nb = 0;
-		}
-	}
-	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
-		i++;
-	if (s[i])
-		return (NULL);
-	return (tmp->list);
 }
 
 uint8_t		str_isranged(const char *s) {
@@ -86,29 +58,6 @@ uint8_t		str_isranged(const char *s) {
 	return (1);
 }
 
-uint8_t		str_islist(const char *s) {
-	size_t	i = 0;
-	uint8_t	sep = 0;
-	uint8_t	check = 0;
-
-	if (!s || !s[i])
-		return (0);
-	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
-		i++;
-	while (isdigit(s[i]) || s[i] == SEPARATOR_STR) {
-		if (s[i] == SEPARATOR_STR)
-			sep = 1;
-		if (isdigit(s[i]))
-			check = 1;
-		i++;
-	}
-	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\v' || s[i] == '\f' || s[i] == '\r' || s[i] == '\n')
-		i++;
-	if (s[i] || !check || !sep)
-		return (0);
-	return (1);
-}
-
 uint8_t		str_isdigit(const char *s) {
 	size_t	i = 0;
 	uint8_t	check = 0;
@@ -128,7 +77,42 @@ uint8_t		str_isdigit(const char *s) {
 	return (1);
 }
 
+char	*ft_strjoin(char *s1, char const *s2) {
+	char		*str;
+	uint32_t	len_s1 = 0;
+	uint32_t	len_s2 = 0;
 
+	if (s2 == NULL)
+		return (NULL);
+	if (s1)
+		len_s1 = strlen(s1);
+	len_s2 = strlen(s2);
+	if (s2[len_s2 - 1] == '\n')
+		len_s2--;
+	if (!(str = malloc(sizeof(char) * (len_s1 + len_s2 + 1))))
+		return (NULL);
+	memmove(str, s1, len_s1);
+	memmove(str + len_s1, s2, len_s2);
+	str[len_s1 + len_s2] = '\0';
+	if (s1)
+		free(s1);
+	return (str);
+}
+
+uint8_t		str_ishost(t_parse *parse, t_list_addr *list, char *host) {
+	struct addrinfo	hints, *res;
+	int				ret;
+
+	bzero(&hints, sizeof(struct addrinfo));
+	hints.ai_family = AF_INET;
+	if ((ret = getaddrinfo(host, NULL, &hints, &res)))
+		return error_parsing_example(parse, host, gai_strerror(ret), parse->i + parse->skip_next);
+	else {
+		list->addr = *(struct sockaddr_in *)res->ai_addr;
+		freeaddrinfo(res);
+	}
+	return (EXIT_SUCCESS);
+}
 
 uint8_t		same_scan(uint8_t *scan, uint8_t check) {
 	uint8_t	i = 0;

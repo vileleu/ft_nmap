@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 17:49:08 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 23:25:00 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 21:33:15 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,19 @@ static t_opt	*init_opt() {
 
 static uint8_t	get_opt(t_parse *parse) {
 	parse->skip_next = 1;
-	// --help
-	if (!strcmp(parse->actual, "help")) {
-		return (EXIT_FAILURE);
-	}
 	// --ports [port/range]
-	else if (!strcmp(parse->actual, "ports")) {
+	if (!strcmp(parse->actual, "ports")) {
 		if (get_opt_port(parse))
 			return (EXIT_FAILURE);
 	}
 	// --ip [address/host]
 	else if (!strcmp(parse->actual, "ip")) {
 		if (get_opt_ip(parse))
+			return (EXIT_FAILURE);
+	}
+	// --file [file]
+	else if (!strcmp(parse->actual, "file")) {
+		if (get_opt_file(parse))
 			return (EXIT_FAILURE);
 	}
 	// --speedup [nb thread]
@@ -87,6 +88,11 @@ static uint8_t	get_shortopt(t_parse *parse) {
 		if (get_opt_ip(parse))
 			return (EXIT_FAILURE);
 	}
+	else if (!strncmp(parse->actual, "f", 1)) {
+		(*(parse->actual += 1)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
+		if (get_opt_file(parse))
+			return (EXIT_FAILURE);
+	}
 	// ( -sp [nb thread] ) or ( -sp[nb thread] )
 	else if (!strncmp(parse->actual, "sp", 2)) {
 		(*(parse->actual += 2)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
@@ -108,6 +114,8 @@ t_opt			*parsing(const char **arg, const int len_arg) {
 	t_opt		*opt;
 	t_parse		*parse;
 	
+	if (get_opt_help(arg, len_arg))
+		return (NULL);
 	if (!(opt = init_opt()))
 		return (error_parsing_init(arg[0]));
 	if (!(parse = init_parse(arg, opt)))
@@ -139,6 +147,10 @@ t_opt			*parsing(const char **arg, const int len_arg) {
 			return (NULL);
 		}
 		parse->i += parse->skip_next + 1;
+	}
+	if (!opt->targets) {
+		error_parsing(parse, "need at least 1 target (use ip or file option)", 0);
+		return (NULL);
 	}
 	free(parse);
 	return (opt);

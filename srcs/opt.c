@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   opt_utils.c                                        :+:      :+:    :+:   */
+/*   opt.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 23:07:01 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/27 23:30:33 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 22:20:10 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,75 +23,82 @@ void	free_list(t_list *list) {
 	}
 }
 
-uint8_t		add_list(t_list **list, void *data) {
-	t_list	*new = NULL;
-	t_list	*tmp = *list;
-	
-	if (!(new = malloc(sizeof(t_list))))
-		return (EXIT_FAILURE);
-	new->data = data;
-	new->next = NULL;
-	if (!*list) {
-		*list = new;
-		return (EXIT_SUCCESS);
-	}
-	while (tmp->next)
-		tmp = tmp->next;
-	tmp->next = new;
-	return (EXIT_SUCCESS);
-}
+void	free_list_addr(t_list_addr *list) {
+	t_list_addr	*tmp = NULL;
 
-t_list		*last_list(t_list *list) {
-	while (list->next)
+	while (list) {
+		tmp = list;
 		list = list->next;
-	return (list);
+		free(tmp->data);
+		free(tmp);
+	}
 }
 
 void    free_opt(t_opt *opt) {
-    free_list(opt->targets);
+    free_list_addr(opt->targets);
 	if (opt->port.islist)
 		free_list(opt->port.list);
     free(opt);
 }
 
-void	print_opt(const char *name, t_opt *opt) {
-	t_list	*tmp = NULL;
+void	print_opt(t_opt *opt) {
+	t_list_addr	*tmp_addr = NULL;
+	t_list		*tmp = NULL;
 	uint8_t	i = 0;
 
-	printf("%s:\n", name);
+	// ip/host
+	printf("Scan Configurations\nTarget Ip-Address : ");
+	tmp_addr = opt->targets;
+	while (tmp_addr) {
+		printf("|%s|", (char *)tmp_addr->data);
+		tmp_addr = tmp_addr->next;
+		if (tmp_addr)
+			printf(" ");
+	}
+	printf("\n");
 	// port
+	printf("No of Ports to scan : ");
 	if (opt->port.isranged)
-		printf("port: %d-%d", opt->port.min, opt->port.max);
+		printf("%d-%d", opt->port.min, opt->port.max);
 	else if (opt->port.islist) {
 		tmp = opt->port.list;
-		printf("port: ");
 		while (tmp) {
-			printf("|%hu|", (*(uint16_t *)tmp->data));
+			printf("%u", (*(uint16_t *)tmp->data));
 			tmp = tmp->next;
 			if (tmp)
 				printf(" ");
 		}
 	}
 	else
-		printf("port: %d", opt->port.port);
+		printf("%d", opt->port.port);
 	printf("\n");
-	// ip/host
-	printf("targets: ");
-	tmp = opt->targets;
-	while (tmp) {
-		printf("|%s|", (char *)tmp->data);
-		tmp = tmp->next;
-		if (tmp)
+	//scan
+	printf("Scans to be performed : ");
+	while (i < 6) {
+		switch (opt->scan[i]) {
+			case 1:
+				printf("SYN");
+				break;
+			case 2:
+				printf("NULL");
+				break;
+			case 3:
+				printf("ACK");
+				break;
+			case 4:
+				printf("FIN");
+				break;
+			case 5:
+				printf("XMAS");
+				break;
+			case 6:
+				printf("UDP");
+				break;
+		}
+		if (i++ < 6)
 			printf(" ");
 	}
 	printf("\n");
 	// thread
-	printf("thread: %d\n", opt->thread);
-	printf("scan: ");
-	while (i < 6) {
-		printf("|%d|", opt->scan[i++]);
-		if (i < 6)
-			printf(" ");
-	}
-	printf("\n");
+	printf("No of threads : %d\n", opt->thread);
 }
