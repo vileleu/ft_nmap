@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 23:07:01 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 22:20:10 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 23:07:47 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	print_opt(t_opt *opt) {
 	printf("Scan Configurations\nTarget Ip-Address : ");
 	tmp_addr = opt->targets;
 	while (tmp_addr) {
-		printf("|%s|", (char *)tmp_addr->data);
+		printf("%s", (char *)tmp_addr->data);
 		tmp_addr = tmp_addr->next;
 		if (tmp_addr)
 			printf(" ");
