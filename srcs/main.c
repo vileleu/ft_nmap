@@ -86,29 +86,25 @@ int check_host_availability(const char *ip_str) {
 
 
 int resolve_target(t_opt *opt, t_target *target) {
-    if (!opt || !target)
-        return 0;
-    if (opt->len_targets == 0 || !opt->targets[0])
+    if (!opt || !opt->targets || !opt->targets->data)
         return 0;
 
-    struct in_addr addr;
-    if (inet_pton(AF_INET, opt->targets[0], &addr) == 1) {
-        strncpy(target->ip_str, opt->targets[0], INET_ADDRSTRLEN);
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+
+    if (inet_pton(AF_INET, opt->targets->data, &addr.sin_addr) == 1) {
+        strncpy(target->ip_str, opt->targets->data, INET_ADDRSTRLEN);
         target->ip_str[INET_ADDRSTRLEN - 1] = '\0';
-        printf("Target IP Address: %s\n", target->ip_str);
+        //printf("Target IP Address: %s\n", target->ip_str);
         return 1;
+    } else {
+        fprintf(stderr, "Invalid IP: %s\n", opt->targets->data);
+        return 0;
     }
-    return 0;
 }
 
 
-void	print_opt(const char *name, t_opt *opt) {
-	printf("%s:\n", name);
-	// port
-	(opt->port.isranged ? printf("port: %d-%d\n", opt->port.min, opt->port.max) : printf("port: %d\n", opt->port.port));
-	// thread
-	printf("thread: %d\n", opt->thread);
-}
 
 int main(const int ac, const char **av) {
     t_opt *opt;
@@ -117,7 +113,6 @@ int main(const int ac, const char **av) {
     if (!(opt = parsing(av, ac)))
         return (EXIT_FAILURE);
     print_opt(opt);
-
 
 
     if (!resolve_target(opt, &target)) {
@@ -167,11 +162,3 @@ int main(const int ac, const char **av) {
 //     print_results();                             // 11. Affiche les résultats
 //     return 0;
 // }
-
-
-	if (!(opt = parsing(av, ac)))
-		return (1);
-	print_opt(av[0] + 2, opt);
-	free(opt);
-	return (0);
-}
