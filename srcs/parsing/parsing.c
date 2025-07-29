@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 17:49:08 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/24 01:04:23 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/28 21:33:15 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,28 +45,20 @@ static t_opt	*init_opt() {
 
 static uint8_t	get_opt(t_parse *parse) {
 	parse->skip_next = 1;
-	// --help
-	if (!strcmp(parse->actual, "help")) {
-		return (EXIT_FAILURE);
-	}
 	// --ports [port/range]
-	else if (!strcmp(parse->actual, "ports")) {
+	if (!strcmp(parse->actual, "ports")) {
 		if (get_opt_port(parse))
 			return (EXIT_FAILURE);
 	}
 	// --ip [address/host]
 	else if (!strcmp(parse->actual, "ip")) {
-		//récupération d’IP PROVISOIRE - juste pour les tests
-		parse->opt->targets = malloc(sizeof(char*)); //stock l'IP
-		if (!parse->opt->targets)
-			return EXIT_FAILURE;
-
-		parse->opt->targets[0] = strdup(parse->next);  // ✅
-		if (!parse->opt->targets[0])
-			return EXIT_FAILURE;
-		// printf pour debug
-		//printf("------> IP parsing = %s\n", parse->next);
-		parse->opt->len_targets = 1;
+		if (get_opt_ip(parse))
+			return (EXIT_FAILURE);
+	}
+	// --file [file]
+	else if (!strcmp(parse->actual, "file")) {
+		if (get_opt_file(parse))
+			return (EXIT_FAILURE);
 	}
 	// --speedup [nb thread]
 	else if (!strcmp(parse->actual, "speedup")) {
@@ -75,6 +67,8 @@ static uint8_t	get_opt(t_parse *parse) {
 	}
 	// --scan [type of scan]
 	else if (!strcmp(parse->actual, "scan")) {
+		if (get_opt_scan(parse))
+			return (EXIT_FAILURE);
 	}
 	else
 		return (error_parsing(parse, "unknown option", parse->i));
@@ -90,7 +84,14 @@ static uint8_t	get_shortopt(t_parse *parse) {
 	}
 	// ( -i [address/host] ) or ( -i[address/host] )
 	else if (!strncmp(parse->actual, "i", 1)) {
-		parse->actual += 1;
+		(*(parse->actual += 1)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
+		if (get_opt_ip(parse))
+			return (EXIT_FAILURE);
+	}
+	else if (!strncmp(parse->actual, "f", 1)) {
+		(*(parse->actual += 1)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
+		if (get_opt_file(parse))
+			return (EXIT_FAILURE);
 	}
 	// ( -sp [nb thread] ) or ( -sp[nb thread] )
 	else if (!strncmp(parse->actual, "sp", 2)) {
@@ -100,7 +101,9 @@ static uint8_t	get_shortopt(t_parse *parse) {
 	}
 	// ( -sc [type of scan] ) or ( -sc[type of scan] )
 	else if (!strncmp(parse->actual, "sc", 2)) {
-		parse->actual += 2;
+		(*(parse->actual += 2)) ? (parse->skip_next = 0) : (parse->skip_next = 1);
+		if (get_opt_scan(parse))
+			return (EXIT_FAILURE);
 	}
 	else
 		return (error_parsing(parse, "unknown option", parse->i));
@@ -111,10 +114,12 @@ t_opt			*parsing(const char **arg, const int len_arg) {
 	t_opt		*opt;
 	t_parse		*parse;
 	
+	if (get_opt_help(arg, len_arg))
+		return (NULL);
 	if (!(opt = init_opt()))
-		return (error_parsing_malloc(arg[0]));
+		return (error_parsing_init(arg[0]));
 	if (!(parse = init_parse(arg, opt)))
-		return (error_parsing_malloc(arg[0]));
+		return (error_parsing_init(arg[0]));
 	parse->i = 1;
 	while (parse->i < len_arg) {
 		parse->skip_next = 0;
@@ -142,6 +147,10 @@ t_opt			*parsing(const char **arg, const int len_arg) {
 			return (NULL);
 		}
 		parse->i += parse->skip_next + 1;
+	}
+	if (!opt->targets) {
+		error_parsing(parse, "need at least 1 target (use ip or file option)", 0);
+		return (NULL);
 	}
 	free(parse);
 	return (opt);
