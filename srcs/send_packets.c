@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 11:28:52 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/29 12:37:56 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/07/29 13:48:31 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ uint8_t     send_syn(uint16_t port) {
     return (EXIT_FAILURE);
 }
 
-// NULL (open, close)
+// NULL (close, filtered, open|filtered)
 uint8_t     send_null(uint16_t port) {
     struct tcphdr   packet;
 
@@ -38,7 +38,7 @@ uint8_t     send_ack(uint16_t port) {
     return (EXIT_FAILURE);
 }
 
-// FIN (open, close)
+// FIN (close, filtered, open|filtered)
 uint8_t     send_fin(uint16_t port) {
     struct tcphdr   packet;
 
@@ -47,7 +47,7 @@ uint8_t     send_fin(uint16_t port) {
     return (EXIT_FAILURE);
 }
 
-// XMAS (open, close)
+// XMAS (close, filtered, open|filtered)
 uint8_t     send_xmas(uint16_t port) {
     struct tcphdr   packet;
 
@@ -58,7 +58,7 @@ uint8_t     send_xmas(uint16_t port) {
     return (EXIT_FAILURE);
 }
 
-// UDP (open, open|filtered)
+// UDP (open, close, filtered, open|filtered)
 uint8_t     send_udp(uint16_t port) {
     struct udphdr   packet;
 
