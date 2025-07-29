@@ -87,57 +87,72 @@ int check_host_availability(const char *ip_str) {
 
 int resolve_target(t_opt *opt, t_target *target) {
     if (!opt || !opt->targets || !opt->targets->data)
-        return 0;
+        return (0);
 
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
 
+    // IP
     if (inet_pton(AF_INET, opt->targets->data, &addr.sin_addr) == 1) {
         strncpy(target->ip_str, opt->targets->data, INET_ADDRSTRLEN);
         target->ip_str[INET_ADDRSTRLEN - 1] = '\0';
-        //printf("Target IP Address: %s\n", target->ip_str);
-        return 1;
-    } else {
-        fprintf(stderr, "Invalid IP: %s\n", opt->targets->data);
-        return 0;
+        return (1);
     }
-}
 
+    //hostname
+    struct addrinfo hints;
+    struct addrinfo *res;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;       
+    hints.ai_socktype = SOCK_DGRAM;
+
+    if (getaddrinfo(opt->targets->data, NULL, &hints, &res) != 0)
+        return (0);
+
+    // Extrait et copie l'IP résolue
+    struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
+    inet_ntop(AF_INET, &ipv4->sin_addr, target->ip_str, INET_ADDRSTRLEN);
+    target->ip_str[INET_ADDRSTRLEN - 1] = '\0';
+
+    freeaddrinfo(res);
+    return (1);
+}
 
 
 int main(const int ac, const char **av) {
     t_opt *opt;
-    t_target	target;
 
     if (!(opt = parsing(av, ac)))
         return (EXIT_FAILURE);
     print_opt(opt);
 
+    t_list_addr *current = opt->targets;
 
-    if (!resolve_target(opt, &target)) {
-        fprintf(stderr, "Could not resolve targets.\n");
-        free_opt(opt);
-        return 1;
+    while (current) {
+        t_target target;
+        t_opt temp_opt = {0};
+
+        temp_opt.targets = current;
+
+        if (!resolve_target(&temp_opt, &target)) {
+            fprintf(stderr, "Could not resolve target: %s\n", current->data);
+        } else {
+            if (!check_host_availability(target.ip_str)) {
+                printf("Host %s is unreachable.\n", target.ip_str);
+            } else {
+                printf("Host %s is up.\n", target.ip_str);
+            }
+        }
+
+        current = current->next;
     }
-
-    if (!check_host_availability(target.ip_str)) {
-		printf("Host %s is unreachable.\n", target.ip_str);
-	} else {
-		printf("Host %s is up.\n", target.ip_str);
-	}
-    // logique pour la future gestion des multiples IP
-    // for (int i = 0; i < target_count; i++) {
-    //     if (!check_host_availability(targets[i].ip_str)) {
-    //         printf("Host %s is unreachable.\n", targets[i].ip_str);
-    //     } else {
-    //         printf("Host %s is up.\n", targets[i].ip_str);
-    //     }
-    // }
 
     free_opt(opt);
     return (EXIT_SUCCESS);
 }
+
+
 
 // // Pseudo-code pour ft_nmap
 // int main(int argc, char **argv) {
