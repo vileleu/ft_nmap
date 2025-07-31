@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "ft_nmap.h"
-#include "target.h"
 
 #include <netinet/ip_icmp.h> //pour macOS
 
@@ -128,6 +127,8 @@ int main(const int ac, const char **av) {
         }
         current = current->next;
     }
+
+	init_scan_configuration(opt);
 
     free_opt(opt);
     return (EXIT_SUCCESS);

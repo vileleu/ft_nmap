@@ -87,4 +87,10 @@ void			free_list_addr(t_list_addr *list);
 void    		free_opt(t_opt *opt);
 void			print_opt(t_opt *opt);
 
+/*
+** INIT SCAN FUNCTIONS
+*/
+
+void			init_scan_configuration(t_opt *opt);
+
 #endif
