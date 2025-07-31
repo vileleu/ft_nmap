@@ -54,7 +54,11 @@ TO DO LIST :
 - ✅ coder check_host_availability
 - ✅ gerer les hostnames -> resolve_target
 - decouper check_host_availability -> trop longue
-- mettre les fonctions dans des fichiers pour ne pas tous mettre dans main.c
+- mettre les fonctions dans des fichiers pour ne pas tous mettre dans main.c - garder check_host_availability dans le main
+- enlever resolve_target - pull
+- recuperer l'argument parsing
+- faire la fonction d'initialisation
+- 
 
 DERNIERES MODIFICATIONS : 
 - creation de la fonction de resolution de l'IP
