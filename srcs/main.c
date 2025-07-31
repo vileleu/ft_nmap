@@ -15,108 +15,98 @@
 
 #include <netinet/ip_icmp.h> //pour macOS
 
+// Calcule le checksum ICMP
 unsigned short checksum(void *buf, int len) {
-	unsigned short *ptr = buf;
-	unsigned int sum = 0;
+    unsigned short *ptr = buf;
+    unsigned int sum = 0;
 
-	for (; len > 1; len -= 2)
-		sum += *ptr++;
-	if (len == 1)
-		sum += *(unsigned char*)ptr;
+    for (; len > 1; len -= 2)
+        sum += *ptr++;
+    if (len == 1)
+        sum += *(unsigned char*)ptr;
 
-	sum = (sum >> 16) + (sum & 0xFFFF);
-	sum += (sum >> 16);
-	return (unsigned short)(~sum);
+    sum = (sum >> 16) + (sum & 0xFFFF);
+    sum += (sum >> 16);
+    return (unsigned short)(~sum);
 }
 
-int check_host_availability(const char *ip_str) {
-	int sockfd;
-	struct sockaddr_in addr;
-	struct icmp icmp_hdr;
-	char packet[64];
-
-	// ouvre un raw socket en mode ICMP
-	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
-		perror("socket");
-		return 0;
-	}
-
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	if (inet_pton(AF_INET, ip_str, &addr.sin_addr) != 1) {
-		fprintf(stderr, "Invalid IP address: %s\n", ip_str);
-		close(sockfd);
-		return 0;
-	}
-
-	// ICMP header
-	memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-	icmp_hdr.icmp_type = ICMP_ECHO;
-	icmp_hdr.icmp_code = 0;
-	icmp_hdr.icmp_id = getpid() & 0xFFFF;
-	icmp_hdr.icmp_seq = 1;
-
-	// Payload (simple string)
-	const char *payload = "ft_nmap_ping";
-	memcpy(packet, &icmp_hdr, sizeof(icmp_hdr));
-	strcpy(packet + sizeof(icmp_hdr), payload);
-
-	int packet_size = sizeof(icmp_hdr) + strlen(payload);
-	icmp_hdr.icmp_cksum = checksum(packet, packet_size);
-	memcpy(packet, &icmp_hdr, sizeof(icmp_hdr));
-
-	if (sendto(sockfd, packet, packet_size, 0,
-	           (struct sockaddr *)&addr, sizeof(addr)) <= 0) {
-		perror("sendto");
-		close(sockfd);
-		return 0;
-	}
-
-	struct timeval timeout = {1, 0};
-	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-
-	char recv_buf[1024];
-	socklen_t addr_len = sizeof(addr);
-	ssize_t bytes_received = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0,
-	                                  (struct sockaddr *)&addr, &addr_len);
-	close(sockfd);
-
-	return (bytes_received > 0);
-}
-
-
-int resolve_target(t_opt *opt, t_target *target) {
-    if (!opt || !opt->targets || !opt->targets->data)
-        return (0);
-
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-
-    // IP
-    if (inet_pton(AF_INET, opt->targets->data, &addr.sin_addr) == 1) {
-        strncpy(target->ip_str, opt->targets->data, INET_ADDRSTRLEN);
-        target->ip_str[INET_ADDRSTRLEN - 1] = '\0';
-        return (1);
+// Envoie le paquet ICMP et attend la réponse (avec timeout 1s)
+int send_and_receive(int sockfd, const struct sockaddr_in *addr, const char *packet, int packet_len) {
+    if (sendto(sockfd, packet, packet_len, 0, (const struct sockaddr *)addr, sizeof(*addr)) <= 0) {
+        perror("sendto");
+        return 0;
     }
 
-    //hostname
-    struct addrinfo hints;
-    struct addrinfo *res;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;       
-    hints.ai_socktype = SOCK_DGRAM;
+    struct timeval timeout = {1, 0};
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
-    if (getaddrinfo(opt->targets->data, NULL, &hints, &res) != 0)
-        return (0);
+    char recv_buf[1024];
+    socklen_t addr_len = sizeof(*addr);
+    ssize_t bytes_received = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0,
+                                      (struct sockaddr *)addr, &addr_len);
+    return (bytes_received > 0);
+}
 
-    // Extrait et copie l'IP résolue
-    struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
-    inet_ntop(AF_INET, &ipv4->sin_addr, target->ip_str, INET_ADDRSTRLEN);
-    target->ip_str[INET_ADDRSTRLEN - 1] = '\0';
 
-    freeaddrinfo(res);
-    return (1);
+// Prépare le paquet ICMP Echo Request, retourne la taille du paquet prêt à être envoyer
+int prepare_icmp_packet(char *packet, size_t packet_size) {
+    struct icmp icmp_hdr = {0}; //Initialise en-tête ICMP a 0
+    icmp_hdr.icmp_type = ICMP_ECHO;
+    icmp_hdr.icmp_code = 0;
+    icmp_hdr.icmp_id = getpid() & 0xFFFF;
+    icmp_hdr.icmp_seq = 1;
+
+	// vérifie que le buffer icmp_hdr est assez grand pour contenir l'en-tête
+    if (packet_size < sizeof(icmp_hdr))
+        return 0;
+
+    memcpy(packet, &icmp_hdr, sizeof(icmp_hdr));
+
+    int total_len = sizeof(icmp_hdr);
+	// Calcule le checksum du paquet pour verif l'intégrité
+    // l'insère dans l'en-tête ICMP du buffer
+    ((struct icmp *)packet)->icmp_cksum = checksum(packet, total_len);
+
+    return total_len;
+}
+
+
+// Init sockaddr_in à partir de l'ip en string current->data
+int init_sockaddr_in(struct sockaddr_in *addr, const char *ip_str) {
+    memset(addr, 0, sizeof(*addr));
+    addr->sin_family = AF_INET;
+    if (inet_pton(AF_INET, ip_str, &addr->sin_addr) != 1) {
+        fprintf(stderr, "Invalid IP address: %s\n", ip_str);
+        return 0;
+    }
+    return 1;
+}
+
+
+int check_host_availability(const char *ip_str) {
+    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (sockfd < 0) {
+		perror("socket");
+        return 0;
+	}
+
+    struct sockaddr_in addr;
+    if (!init_sockaddr_in(&addr, ip_str)) {
+        close(sockfd);
+        return 0;
+    }
+
+    char packet[64];
+    int packet_len = prepare_icmp_packet(packet, sizeof(packet));
+    if (!packet_len) {
+        close(sockfd);
+        fprintf(stderr, "Packet buffer too small\n");
+        return 0;
+    }
+
+    int result = send_and_receive(sockfd, &addr, packet, packet_len);
+    close(sockfd);
+    return result;
 }
 
 
@@ -130,21 +120,12 @@ int main(const int ac, const char **av) {
     t_list_addr *current = opt->targets;
 
     while (current) {
-        t_target target;
-        t_opt temp_opt = {0};
-
-        temp_opt.targets = current;
-
-        if (!resolve_target(&temp_opt, &target)) {
-            fprintf(stderr, "Could not resolve target: %s\n", current->data);
+        // current->data contient les IP
+        if (!check_host_availability(current->data)) {
+            printf("Host %s is unreachable.\n", current->data);
         } else {
-            if (!check_host_availability(target.ip_str)) {
-                printf("Host %s is unreachable.\n", target.ip_str);
-            } else {
-                printf("Host %s is up.\n", target.ip_str);
-            }
+            printf("Host %s is up.\n", current->data);
         }
-
         current = current->next;
     }
 
