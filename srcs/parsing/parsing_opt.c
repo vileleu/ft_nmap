@@ -56,14 +56,14 @@ uint8_t		get_opt_port(t_parse *parse) {
 	}
 	if (parse->is_ranged) {
 		if (tmp.un.ranged.max > MAX_PORT || tmp.un.ranged.min > tmp.un.ranged.max)
-			return (error_parsing_example(parse, "port range is wrong", "(0 < port <= 65535)", parse->i + parse->skip_next));
+			return (error_parsing_example(parse, "port range is wrong", "(0 < port <= 1024)", parse->i + parse->skip_next));
 		parse->opt->port.min = tmp.un.ranged.min;
 		parse->opt->port.max = tmp.un.ranged.max;
 	}
 	else if (parse->is_list) {
 		if (tmp.error == ERROR_LIMIT) {
 			tmp.un.list ? free_list(tmp.un.list) : (void)0;
-			return (error_parsing_example(parse, "port list is wrong", "(0 < port <= 65535)", parse->i + parse->skip_next));
+			return (error_parsing_example(parse, "port list is wrong", "(0 < port <= 1024)", parse->i + parse->skip_next));
 		}
 		else if (tmp.error == ERROR_SAME) {
 			tmp.un.list ? free_list(tmp.un.list) : (void)0;
@@ -75,7 +75,7 @@ uint8_t		get_opt_port(t_parse *parse) {
 	}
 	else {
 		if (tmp.un.nb > MAX_PORT)
-			return (error_parsing_example(parse, "port number is wrong", "(0 < port <= 65535)", parse->i + parse->skip_next));
+			return (error_parsing_example(parse, "port number is wrong", "(0 < port <= 1024)", parse->i + parse->skip_next));
 		parse->opt->port.isranged = 0;
 		parse->opt->port.port = tmp.un.nb;
 	}

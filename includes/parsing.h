@@ -16,7 +16,7 @@
 #include "ft_nmap.h"
 
 #define MIN_PORT_DEFAULT 1
-#define MAX_PORT_DEFAULT 65535
+#define MAX_PORT_DEFAULT 1024
 #define THREAD_DEFAULT 0
 
 #define SEPARATOR_STR ','

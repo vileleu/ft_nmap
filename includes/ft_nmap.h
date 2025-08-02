@@ -33,7 +33,7 @@
 
 #define MAX_RANGE_SCAN 1024
 
-#define MAX_PORT 65535
+#define MAX_PORT 1024
 #define MAX_THREAD 250
 
 #define MAX_SIZE_SCAN 6

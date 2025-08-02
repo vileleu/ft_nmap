@@ -1,40 +1,43 @@
 #include "ft_nmap.h"
 
-void init_scan_configuration(t_opt *opt)
-{
-    // 1. Vérifier si des ports ont été spécifiés
-    // Si aucun port n'est fourni (ni plage, ni liste)
-    //     → Initialiser la plage par défaut : min = 1, max = 1024
+int get_total_ports(t_port *port) {
+    if (!port)
+        return 0;
 
-    // 2. Calculer le nombre total de ports à scanner
-    // Si une plage a été spécifiée
-    //     → nb_ports = max - min + 1
-    // Sinon si une liste de ports a été fournie
-    //     → nb_ports = compter les éléments de la liste chaînée
+    if (port->isranged)
+        return (port->max - port->min + 1);
 
-    // 3. Vérifier que le nombre total de ports ne dépasse pas 1024
-    // Si nb_ports > 1024
-    //     → Afficher une erreur et quitter le programme
+    if (port->islist) {
+        int count = 0;
+        t_list *tmp = port->list;
+        while (tmp) {
+            count++;
+            tmp = tmp->next;
+        }
+        return count;
+    }
 
-    // 4. Vérifier les types de scans demandés
-    // Si aucun des opt->scan[i] n'est activé (tous à 0)
-    //     → Activer tous les types : SYN, NULL, ACK, FIN, XMAS, UDP
-
-    // 5. Vérifier le nombre de threads
-    // Si opt->thread == 0
-    //     → Définir une valeur par défaut (ex : 10)
-    // Sinon si opt->thread > 250
-    //     → Afficher une erreur et quitter
-
-    // 6. Préparer la répartition des ports entre les threads
-    // → ports_par_thread = nb_ports / opt->thread
-    // → gérer le reste : nb_ports % opt->thread
-    //     (ex : ajouter 1 port de plus à certains threads pour équilibrer)
-
-    // 7. Initialiser des structures pour chaque thread
-    // → Pour chaque thread :
-    //     - Plage de ports à scanner
-    //     - Adresse IP cible
-    //     - Types de scans à effectuer
-    //     - (Facultatif : résultat du scan, chrono, etc.)
+    return 0; // aucun port défini
 }
+
+
+void init_scan_configuration(t_opt *opt) {
+
+    // Calculer le nombre total de ports à scanner pour répartir le scan entre les threads
+    int total_ports = get_total_ports(&opt->port);
+    //printf("Nombre total de ports à scanner : %d\n", total_ports);
+
+    // Répartition des ports entre les threads
+    int ports_per_thread = total_ports / opt->thread;
+    int reste = total_ports % opt->thread;
+    // printf("Répartition des ports :\n");
+    // printf("- %d ports par thread\n", ports_per_thread);
+    // printf("- %d threads auront 1 port supplémentaire (pour équilibrer)\n", reste);
+    // for (int i = 0; i < opt->thread; i++) {
+    //     int ports_for_this_thread = ports_per_thread + (i < reste ? 1 : 0);
+    //     printf("Thread %d → %d port(s)\n", i + 1, ports_for_this_thread);
+    // }
+    
+    // Allocation d’un tableau t_thread_data et lancement des threads avec cette structure
+}
+

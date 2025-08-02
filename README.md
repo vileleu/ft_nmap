@@ -56,17 +56,26 @@ TO DO LIST :
 - ✅ decouper check_host_availability -> trop longue
 - ✅ enlever resolve_target - pull
 - ✅ recuperer l'argument parsing
-- lire la struct opt
-- faire la fonction d'initialisation
-- 
+- ✅ lire la struct opt
+- ✅ faire la fonction d'initialisation
+- lire de la doc sur les threads
+- faire la derniere etape d'init_scan_configuration
 
 DERNIERES MODIFICATIONS : 
 -  /!\ bibliotheque sur macOS, travailler sur la VM, ne pas oublier de faire les modifs pour Linux /!\
+- #define MAX_PORT 1024 car "• The ports to be scanned can be read as a range or individually. In the case no port
+is specified the scan must run with the range 1-1024.
+• The number of ports scanned cannot exceed 1024."
 
 
 DOC fonction - check_host_availability :
 - Fonction pour détecter si chaque hôte est actif/joignable ou non : ici j'utilise le ping classique ICMP
 - methode : ouvre un raw socket en mode ICMP, construis un paquet ICMP Echo Request, envoies à l’IP cible, attends une réponse (ICMP Echo Reply), i reçue dans la limite timeout → hôte actif, sinon → pas actif
+
+DOC fonction - init_scan_configuration :
+- Pourquoi répartir les ports entre les threads : Quand on lance un scan de ports, l'idée est de gagner du temps en lançant plusieurs tâches en parallèle. Chaque tâche est gérée par un thread, qui va s’occuper de scanner un ou plusieurs ports. Mais pour que ce soit efficace, il faut savoir quels ports chaque thread va scanner. La répartition sert donc à : Scanner tous les ports sans en oublier, Équilibrer le travail entre les threads, Maximiser la vitesse d’exécution, Éviter la surcharge de certains threads.
+   a) nb port / nb thread, exemple : 20 ports / 2 threads = 10 ports pour 2 threads
+- Pourquoi allouer une structure t_thread_data : t_opt contient la config globale avec tous les ports et toutes les cibles et t_thread_data contient la partie du travail assignée à un thread précis (par exemple : ports 1-10 pour le thread 1, ports 11-20 pour le thread 2, etc.)
 
 
 EXEMPLES COMMANDES
@@ -78,4 +87,3 @@ sudo ./ft_nmap --ip 192.168.1.1 --scan SYN,XMAS
 sudo ./ft_nmap --ip 192.168.1.1 --speedup 50
 sudo ./ft_nmap --file targets.txt
 sudo ./ft_nmap --help
-
