@@ -27,6 +27,7 @@ Chacun sert à scanner des ports sur une machine déjà détectée comme active.
 4) FIN Scan	(-sF) : Envoie un paquet avec le drapeau FIN. Normalement, un port fermé renvoie un RST.
 5) XMAS Scan (-sX) : Envoie un paquet avec les drapeaux FIN, URG, et PSH (comme un "sapin de Noël allumé")
 6) UDP (-sU) : Envoie un paquet UDP vide. Si "Port unreachable" ICMP est reçu → fermé
+source : https://nmap.org/book/man-port-scanning-techniques.html
 
 - Arguments à gérer :
 1) --help
@@ -59,7 +60,7 @@ TO DO LIST :
 - ✅ lire la struct opt
 - ✅ faire la fonction d'initialisation
 - lire de la doc sur les threads
-- faire la derniere etape d'init_scan_configuration
+- ✅ faire la derniere etape d'init_scan_configuration
 
 DERNIERES MODIFICATIONS : 
 -  /!\ bibliotheque sur macOS, travailler sur la VM, ne pas oublier de faire les modifs pour Linux /!\

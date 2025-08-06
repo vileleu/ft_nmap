@@ -29,7 +29,7 @@
 #include <netinet/ip_icmp.h>
 #include <netinet/in.h>
 #include <time.h>
-
+#include <pthread.h>
 
 #define MAX_RANGE_SCAN 1024
 
@@ -71,6 +71,12 @@ typedef struct	s_opt {
 	uint8_t		thread;
 	uint8_t		scan[6];
 }				t_opt;
+
+typedef struct s_thread_data {
+    char *ip;
+    t_list *ports;        // Liste de ports pour ce thread
+    uint8_t scan[6];      // Types de scan activés
+} t_thread_data;
 
 /*
 ** PARSING FUNCTIONS
