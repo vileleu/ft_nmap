@@ -1,56 +1,6 @@
 #include "ft_nmap.h"
 
 
-
-t_list *create_list_from_range(uint16_t min, uint16_t max) {
-    t_list *head = NULL;
-    t_list *tail = NULL;
-
-    for (uint16_t port = min; port <= max; port++) {
-        t_list *new_node = malloc(sizeof(t_list));
-        if (!new_node)
-            exit(EXIT_FAILURE);
-        new_node->data = malloc(sizeof(uint16_t));
-        *(new_node->data) = port;
-        new_node->next = NULL;
-
-        if (!head)
-            head = new_node;
-        else
-            tail->next = new_node;
-        tail = new_node;
-    }
-
-    return head;
-}
-
-t_list *copy_ports(t_list *all_ports, int start, int count) {
-    t_list *result = NULL;
-    t_list *tail = NULL;
-    int index = 0;
-
-    while (all_ports && index < start + count) {
-        if (index >= start) {
-            t_list *new_node = malloc(sizeof(t_list));
-            if (!new_node)
-                exit(EXIT_FAILURE);
-            new_node->data = malloc(sizeof(uint16_t));
-            *(new_node->data) = *(all_ports->data);
-            new_node->next = NULL;
-
-            if (!result)
-                result = new_node;
-            else
-                tail->next = new_node;
-            tail = new_node;
-        }
-        all_ports = all_ports->next;
-        index++;
-    }
-
-    return result;
-}
-
 void free_port_list(t_list *list) {
     t_list *tmp;
     while (list) {
@@ -62,30 +12,6 @@ void free_port_list(t_list *list) {
 }
 
 
-t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_ports) {
-    int ports_per_thread = total_ports / opt->thread;
-    int reste = total_ports % opt->thread;
-
-    printf("Répartition des ports :\n");
-    printf("- %d ports par thread\n", ports_per_thread);
-    printf("- %d threads auront 1 port supplémentaire (pour équilibrer)\n", reste);
-
-    t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
-    if (!threads_data)
-        exit(EXIT_FAILURE);
-
-    int port_index = 0;
-    for (int i = 0; i < opt->thread; i++) {
-        int count = ports_per_thread + (i < reste ? 1 : 0);
-        threads_data[i].ip = opt->targets->data;
-        threads_data[i].ports = copy_ports(all_ports, port_index, count);
-        memcpy(threads_data[i].scan, opt->scan, sizeof(uint8_t) * 6);
-        port_index += count;
-        printf("Thread %d → %d port(s)\n", i + 1, count);
-    }
-
-    return threads_data;
-}
 
 void *scan_thread(void *arg) {
     (void)arg;
@@ -122,6 +48,92 @@ void cleanup_threads(int thread_count, pthread_t *threads, t_thread_data *thread
     free(threads);
 }
 
+t_list *copy_ports(t_list *all_ports, int start, int count) {
+    t_list *result = NULL;
+    t_list *tail = NULL;
+    int index = 0;
+
+    while (all_ports && index < start + count) {
+        if (index >= start) {
+            t_list *new_node = malloc(sizeof(t_list));
+            if (!new_node) {
+                free_port_list(new_node);
+                exit(EXIT_FAILURE);
+            }
+            new_node->data = malloc(sizeof(uint16_t));
+            *(new_node->data) = *(all_ports->data);
+            new_node->next = NULL;
+
+            if (!result)
+                result = new_node;
+            else
+                tail->next = new_node;
+            tail = new_node;
+        }
+        all_ports = all_ports->next;
+        index++;
+    }
+
+    return result;
+}
+
+t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_ports) {
+    //Répartition des ports par thread
+    int ports_per_thread = total_ports / opt->thread; //opt->thread = nb thread
+    int reste = total_ports % opt->thread;
+
+    printf("Répartition des ports :\n");
+    printf("- %d ports par thread\n", ports_per_thread);
+    printf("- %d threads auront 1 port supplémentaire (pour équilibrer)\n", reste);
+
+    t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread); //qlloue dynamiquement un tableau contenant une structure t_thread_data par thread
+    if (!threads_data) {
+        free_port_list(threads_data);
+        exit(EXIT_FAILURE);
+    }
+    int port_index = 0;
+    for (int i = 0; i < opt->thread; i++) {
+        int count = ports_per_thread;
+        if (i < reste)
+            count += 1;
+        threads_data[i].ip = opt->targets->data; //associe à chaque thread l’IP cible à scanner 
+        threads_data[i].ports = copy_ports(all_ports, port_index, count); //copie une portion de la liste de ports pour ce thread
+        memcpy(threads_data[i].scan, opt->scan, sizeof(uint8_t) * 6);
+        port_index += count;
+        printf("Thread %d → %d port(s)\n", i + 1, count);
+    }
+
+    return threads_data;
+}
+
+// crée une liste chaînée de ports à partir de l'intervalle donné pour creer ls threads
+t_list *create_list_from_range(uint16_t min, uint16_t max) {
+    t_list *head = NULL;
+    t_list *last_node = NULL;
+
+    for (uint16_t port = min; port <= max; port++) {
+        t_list *new_node = malloc(sizeof(t_list)); //alloue dynamiquement un nouveau nœud de la liste
+        if (!new_node) {
+            free_port_list(head);
+            exit(EXIT_FAILURE);
+        }
+        new_node->data = malloc(sizeof(uint16_t)); // Le champ data pointe vers un entier (uint16_t) contenant la valeur du port courant
+        *(new_node->data) = port; //On copie la valeur du port dans ce champ
+        new_node->next = NULL;
+
+        // Si c’est le premier nœud, on initialise head.
+        //Sinon, on chaîne ce nouveau nœud à la fin de la liste.
+        if (!head)
+            head = new_node;
+        else
+            last_node->next = new_node;
+        last_node = new_node;
+    }
+
+    return head;
+}
+
+//preparer pour allocate_thread_data
 t_list *prepare_all_ports(t_port *port) {
     if (port->isranged)
         return create_list_from_range(port->min, port->max);
