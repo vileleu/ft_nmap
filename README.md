@@ -61,6 +61,7 @@ TO DO LIST :
 - ✅ faire la fonction d'initialisation
 - lire de la doc sur les threads
 - ✅ faire la derniere etape d'init_scan_configuration
+- revoir les free du fichier init_scan_configuration.c
 
 DERNIERES MODIFICATIONS : 
 -  /!\ bibliotheque sur macOS, travailler sur la VM, ne pas oublier de faire les modifs pour Linux /!\
@@ -77,6 +78,11 @@ DOC fonction - allocate_thread_data :
 - Pourquoi répartir les ports entre les threads : Quand on lance un scan de ports, l'idée est de gagner du temps en lançant plusieurs tâches en parallèle. Chaque tâche est gérée par un thread, qui va s’occuper de scanner un ou plusieurs ports. Mais pour que ce soit efficace, il faut savoir quels ports chaque thread va scanner. La répartition sert donc à : Scanner tous les ports sans en oublier, Équilibrer le travail entre les threads, Maximiser la vitesse d’exécution, Éviter la surcharge de certains threads.
    a) nb port / nb thread, exemple : 20 ports / 2 threads = 10 ports pour 2 threads
 - Pourquoi allouer une structure t_thread_data : t_opt contient la config globale avec tous les ports et toutes les cibles et t_thread_data contient la partie du travail assignée à un thread précis (par exemple : ports 1-10 pour le thread 1, ports 11-20 pour le thread 2, etc.)
+- a) On commence par calculer le nb de ports à scanner par thread
+b) puis on alloue de l'espace pour les data des threads qu'on va remplir avec les informations pour le lancement des t_thread_data 
+c) on répartit les ports par thread = Il y a 3 index, 1 pour parcourir la liste complete de ports, 1 pour savoir dans quel thread on se trouve, 1 pour savoir sur quelle portion de ports on se trouve car chaque thread a sa portion de port. 
+d) L'index pour les ports va parcourir la liste des ports jusqu'a la fin en s'incrementant selon le nombre de threads, par exemple si le nb de port a copier pour le thread 1 est de 5, "ports_for_this_thread;" est de 5 aussi donc pour continuer a copier les autres threads je vais a 5 positions plus loin dans ma liste de ports. Pour l'index "thread_index", il me permet de savoir a quel thread attribuer tel information (ip, rangee de port, option de scan)
+e) avant le remplissage au cas ou il y a un port en reste car nombre de ports impaires j'ajoute a ports_for_this_thread 1 port en plus comme ca je traite les threads contenant des ports impaires au debut
 
 
 EXEMPLES COMMANDES
