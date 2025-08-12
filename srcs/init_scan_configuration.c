@@ -11,12 +11,6 @@ void free_port_list(t_list *list) {
     }
 }
 
-void wait_for_threads(int thread_count, pthread_t *threads) {
-    for (int i = 0; i < thread_count; i++) {
-        pthread_join(threads[i], NULL);
-    }
-}
-
 void cleanup_threads(int thread_count, pthread_t *threads, t_thread_data *threads_data) {
     for (int i = 0; i < thread_count; i++) {
         free_port_list(threads_data[i].ports);
@@ -25,13 +19,17 @@ void cleanup_threads(int thread_count, pthread_t *threads, t_thread_data *thread
     free(threads);
 }
 
-// appeller les differents scans
+void wait_for_threads(int thread_count, pthread_t *threads) {
+    for (int i = 0; i < thread_count; i++) {
+        pthread_join(threads[i], NULL);
+    }
+}
+
 void *scan_thread(void *arg) {
     (void)arg;
-    t_thread_data *data = (t_thread_data *)arg;
 
-    // Exemple basique pour test
-    printf("Thread lancé pour IP %s\n", data->ip);
+    // future fonction
+    printf("Lancement des SCANS : \n");
     return NULL;
 }
 
@@ -40,12 +38,12 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
     // de tous les threads pour les wait
     pthread_t *threads = malloc(sizeof(pthread_t) * opt->thread);
     if (!threads) {
-        free(threads);
+        //free(threads);
         exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < opt->thread; i++) {
-        pthread_create(&threads[i], NULL, scan_thread, &threads_data[i]);
+        pthread_create(&threads[i], NULL, scan_thread, &threads_data[i]); //scan_thread = appelle la fonction avce tous les scans
     }
 
     return threads;
@@ -102,7 +100,7 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
-        free(threads_data);
+        //free(threads_data);
         exit(EXIT_FAILURE);
     }
 
@@ -137,6 +135,11 @@ t_list *create_list_from_range(uint16_t min, uint16_t max) {
             exit(EXIT_FAILURE);
         }
         new_node->data = malloc(sizeof(uint16_t)); // Le champ data pointe vers un entier (uint16_t) contenant la valeur du port courant
+        if (!new_node) {
+            free_port_list(head);
+            free(new_node);
+            exit(EXIT_FAILURE);
+        }
         *(new_node->data) = port; //On copie la valeur du port dans ce champ
         new_node->next = NULL;
 
@@ -185,7 +188,7 @@ void init_scan_configuration(t_opt *opt) {
     int total_ports = get_total_ports(&opt->port);
     t_list *all_ports = prepare_all_ports(&opt->port);
     t_thread_data *threads_data = allocate_thread_data(opt, all_ports, total_ports);
-    pthread_t *threads = launch_threads(opt, threads_data); //lanement des threads
+    pthread_t *threads = launch_threads(opt, threads_data); //lancement des threads
 
     wait_for_threads(opt->thread, threads);
     cleanup_threads(opt->thread, threads, threads_data);

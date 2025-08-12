@@ -59,9 +59,9 @@ TO DO LIST :
 - ✅ recuperer l'argument parsing
 - ✅ lire la struct opt
 - ✅ faire la fonction d'initialisation
-- lire de la doc sur les threads
+- ✅ lire de la doc sur les threads
 - ✅ faire la derniere etape d'init_scan_configuration
-- revoir les free du fichier init_scan_configuration.c
+- ✅ revoir les free du fichier init_scan_configuration.c : pas de free si 
 
 DERNIERES MODIFICATIONS : 
 -  /!\ bibliotheque sur macOS, travailler sur la VM, ne pas oublier de faire les modifs pour Linux /!\
@@ -86,6 +86,7 @@ e) avant le remplissage au cas ou il y a un port en reste car nombre de ports im
 
 
 EXEMPLES COMMANDES
+sudo ./ft_nmap --ports 1-10 --ip 1.1.1.1 --speedup 2
 sudo ./ft_nmap --ports 20-30 --ip 1.1.1.1 --speedup 50
 sudo ./ft_nmap --ip 192.168.1.1
 sudo ./ft_nmap --ip 192.168.1.1 --ports 22,80,443
