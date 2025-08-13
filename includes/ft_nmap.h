@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 22:53:01 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/14 00:08:01 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,10 @@
 
 #include <ctype.h>
 #include <netdb.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
@@ -72,6 +70,12 @@ typedef struct	s_opt {
 */
 
 t_opt			*parsing(const char **arg, const int len_arg);
+
+/*
+** SCANS FUNCTIONS
+*/
+
+uint8_t			send_scan(struct sockaddr_in *dst, uint16_t port, uint8_t scan);
 
 /*
 ** OPT UTILS FUNCTIONS

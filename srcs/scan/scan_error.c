@@ -1,27 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   scan_error.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/14 00:49:24 by vileleu          ###   ########.fr       */
+/*   Created: 2025/08/06 00:09:42 by vileleu           #+#    #+#             */
+/*   Updated: 2025/08/14 00:18:09 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_nmap.h"
+#include "scan.h"
 
-int	main(const int ac, const char **av) {
-	t_opt		*opt;
+uint8_t	error_scan(const char *msg) {
+	fprintf(stderr, "%s: %s\n", "ft_nmap", msg);
+	return (EXIT_FAILURE);
+}
 
-	if (!(opt = parsing(av, ac)))
-		return (EXIT_FAILURE);
-	print_opt(opt);
-	if (send_scan(&opt->targets->addr, 3000, SYN)) {
-		free_opt(opt);
-		return (EXIT_FAILURE);
-	}
-	free_opt(opt);
-	return (EXIT_SUCCESS);
+uint8_t	error_scan_errno(const char *msg) {
+	fprintf(stderr, "%s: %s: %s\n", "ft_nmap", msg, strerror(errno));
+	return (EXIT_FAILURE);
 }
