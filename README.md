@@ -59,9 +59,9 @@ TO DO LIST :
 - ✅ recuperer l'argument parsing
 - ✅ lire la struct opt
 - ✅ faire la fonction d'initialisation
-- lire de la doc sur les threads
+- ✅ lire de la doc sur les threads
 - ✅ faire la derniere etape d'init_scan_configuration
-- revoir les free du fichier init_scan_configuration.c
+- ✅ revoir les free du fichier init_scan_configuration.c : pas de free si 
 
 DERNIERES MODIFICATIONS : 
 -  /!\ bibliotheque sur macOS, travailler sur la VM, ne pas oublier de faire les modifs pour Linux /!\
@@ -84,8 +84,11 @@ c) on répartit les ports par thread = Il y a 3 index, 1 pour parcourir la liste
 d) L'index pour les ports va parcourir la liste des ports jusqu'a la fin en s'incrementant selon le nombre de threads, par exemple si le nb de port a copier pour le thread 1 est de 5, "ports_for_this_thread;" est de 5 aussi donc pour continuer a copier les autres threads je vais a 5 positions plus loin dans ma liste de ports. Pour l'index "thread_index", il me permet de savoir a quel thread attribuer tel information (ip, rangee de port, option de scan)
 e) avant le remplissage au cas ou il y a un port en reste car nombre de ports impaires j'ajoute a ports_for_this_thread 1 port en plus comme ca je traite les threads contenant des ports impaires au debut
 
+THREADS : 
+- https://www.geeksforgeeks.org/c/multithreading-in-c/
 
 EXEMPLES COMMANDES
+sudo ./ft_nmap --ports 1-10 --ip 1.1.1.1 --speedup 2
 sudo ./ft_nmap --ports 20-30 --ip 1.1.1.1 --speedup 50
 sudo ./ft_nmap --ip 192.168.1.1
 sudo ./ft_nmap --ip 192.168.1.1 --ports 22,80,443
