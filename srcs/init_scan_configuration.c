@@ -31,7 +31,7 @@ void *scan_thread(void *arg) {
     t_thread_data *data = (t_thread_data *)arg;
 
     // Exemple basique pour test
-    printf("Thread lancé pour IP %s\n", data->ip);
+    printf("Thread started for IP %s\n", data->ip);
     return NULL;
 }
 
@@ -96,6 +96,13 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
     int base_ports_per_thread = total_ports / opt->thread;
     int extra_ports = total_ports % opt->thread;
 
+    // car ex : 2 / 10 = 0
+    if (total_ports < opt->thread){
+        printf("\nInsufficient ports per thread\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // debug a commenter
     printf("Répartition des ports :\n");
     printf("- %d ports par thread\n", base_ports_per_thread);
     printf("- %d threads auront 1 port supplémentaire (pour équilibrer)\n", extra_ports);
@@ -162,11 +169,10 @@ t_list *prepare_all_ports(t_port *port) {
 }
 
 int get_total_ports(t_port *port) {
-    if (!port)
-        return 0;
 
-    if (port->isranged) //retourne le nombre total d’éléments dans la plage
+    if (port->isranged) {//retourne le nombre total d’éléments dans la plage
         return (port->max - port->min + 1);
+    }
 
     if (port->islist) { //compter les éléments de la liste chaînée
         int count = 0;
@@ -176,6 +182,10 @@ int get_total_ports(t_port *port) {
             tmp = tmp->next;
         }
         return count;
+    }
+    else { // car 1 port ne rentre ni dans plage ni dans liste chaînée
+        int nb_port = 1;
+        return nb_port;
     }
 
     return 0;
