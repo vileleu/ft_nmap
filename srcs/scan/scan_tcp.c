@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:36:41 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/14 00:53:25 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/14 16:42:30 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void	fill_tcp_packet(unsigned char *packet, size_t packet_size, struct sockaddr_
     tcp->seq = htonl(0);              // sequence
     tcp->ack_seq = htonl(0);          // acknowledgment number (set to 0 for ignore)
     tcp->doff = 5;                    // tcp header length (4 bytes / 1 word)
-    set_flag_scan(tcp, scan);              // SYN on
+    set_flag_scan(tcp, scan);         // SYN on
     tcp->window = htons(5840);        // TCP window size (default is 5840)
     tcp->check = 0;                   // checksum
     tcp->urg_ptr = 0;                 // urgent pointer (set to 0 for ignore)
@@ -59,6 +59,7 @@ uint8_t	send_tcp_packet(const unsigned char *packet, size_t packet_size, struct 
 		return (error_scan_errno("setsockopt"));
 	if ((sendto(sock, packet, packet_size, 0, (struct sockaddr *)dst, sizeof(*dst))) < 0)
 		return (error_scan_errno("sendto"));
+	close(sock);
 	printf("success!\n");
 	return (EXIT_SUCCESS);
 }
