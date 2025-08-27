@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/22 15:48:39 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 22:48:43 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/27 14:41:36 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,15 +55,15 @@ uint8_t		get_opt_port(t_parse *parse) {
 		return (EXIT_FAILURE);
 	}
 	if (parse->is_ranged) {
-		if (tmp.un.ranged.max > MAX_PORT || tmp.un.ranged.min > tmp.un.ranged.max)
-			return (error_parsing_example(parse, "port range is wrong", "(0 < port <= 1024)", parse->i + parse->skip_next));
+		if (tmp.un.ranged.max > MAX_PORT || tmp.un.ranged.min > tmp.un.ranged.max || tmp.un.ranged.max - tmp.un.ranged.min >= MAX_RANGE_SCAN)
+			return (error_parsing_example(parse, "port range is wrong", "(0 < port <= 65535, max range = 1024)", parse->i + parse->skip_next));
 		parse->opt->port.min = tmp.un.ranged.min;
 		parse->opt->port.max = tmp.un.ranged.max;
 	}
 	else if (parse->is_list) {
-		if (tmp.error == ERROR_LIMIT) {
+		if (tmp.error == ERROR_LIMIT || count_list(tmp.un.list) > MAX_RANGE_SCAN) {
 			tmp.un.list ? free_list(tmp.un.list) : (void)0;
-			return (error_parsing_example(parse, "port list is wrong", "(0 < port <= 1024)", parse->i + parse->skip_next));
+			return (error_parsing_example(parse, "port list is wrong", "(0 < port <= 65535, max range = 1024)", parse->i + parse->skip_next));
 		}
 		else if (tmp.error == ERROR_SAME) {
 			tmp.un.list ? free_list(tmp.un.list) : (void)0;
@@ -111,7 +111,7 @@ uint8_t		get_opt_scan(t_parse *parse) {
 	}
 	if ((parse->skip_next && (!parse->next || !*parse->next)) || (!parse->skip_next && !(*(parse->actual))))
 		return (error_parsing(parse, "scan option need 1 argument", parse->i));
-	while (i_scan < MAX_SIZE_SCAN && parse->opt->scan[i_scan])
+	while (i_scan < SIZE_SCAN && parse->opt->scan[i_scan])
 		i_scan++;
 	if ((ret_scan = get_scan(parse, s, i_scan)) == 1)
 		return (error_parsing_example(parse, "bad argument for scan option", "(SYN,NULL,ACK,FIN,XMAS,UDP)", parse->i + parse->skip_next));

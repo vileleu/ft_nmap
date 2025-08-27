@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 21:32:38 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/26 16:03:02 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ int main(const int ac, const char **av) {
         return EXIT_FAILURE;
 
     print_opt(opt);
+    srand(time(NULL));
     run_scan(opt);
     free_opt(opt);
 

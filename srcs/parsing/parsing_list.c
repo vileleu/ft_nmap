@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/28 15:13:36 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 23:19:45 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/27 14:37:23 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,4 +146,14 @@ t_list		*last_list(t_list *list) {
 	while (list->next)
 		list = list->next;
 	return (list);
+}
+
+uint32_t	count_list(t_list *list) {
+	uint32_t	count = 0;
+
+	while (list->next) {
+		count++;
+		list = list->next;
+	}
+	return (count);
 }

@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 22:53:01 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/27 14:50:30 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,10 @@
 
 #include <ctype.h>
 #include <netdb.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
@@ -31,12 +29,14 @@
 #include <time.h>
 #include <pthread.h>
 
-#define MAX_RANGE_SCAN 1024
+#define SIZE_SCAN 6
 
-#define MAX_PORT 1024
+#define MAX_PORT 65535
 #define MAX_THREAD 250
 
-#define MAX_SIZE_SCAN 6
+#define MAX_RANGE_SCAN 1024
+#define MIN_PORT_SOURCE 30000
+#define MAX_PORT_SOURCE (MAX_PORT - MAX_RANGE_SCAN * SIZE_SCAN)
 
 #define SYN 1
 #define NUL 2
@@ -69,13 +69,14 @@ typedef struct	s_opt {
 	t_list_addr	*targets;
 	t_port		port;
 	uint8_t		thread;
-	uint8_t		scan[6];
+	uint8_t		scan[SIZE_SCAN];
 }				t_opt;
 
 typedef struct s_thread_data {
-    char *ip;
-    t_list *ports;        // Liste de ports pour ce thread
-    uint8_t scan[6];      // Types de scan activés
+    struct sockaddr_in	addr;
+    t_list 				*ports;  // Liste de ports pour ce thread
+    uint8_t 			scan[SIZE_SCAN]; // Types de scan activés
+	uint16_t			source;
 } t_thread_data;
 
 /*
@@ -83,6 +84,13 @@ typedef struct s_thread_data {
 */
 
 t_opt			*parsing(const char **arg, const int len_arg);
+
+/*
+** SCANS FUNCTIONS
+*/
+
+uint16_t		scan_send(struct sockaddr_in *dst, t_list *port, uint8_t scan[SIZE_SCAN], uint16_t source);
+uint8_t			scan_receive(uint16_t source, uint16_t count);
 
 /*
 ** OPT UTILS FUNCTIONS
