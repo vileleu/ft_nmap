@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/14 00:06:09 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/14 00:29:16 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/26 22:54:27 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,26 @@
 #include <arpa/inet.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <netinet/udp.h>
 #include <sys/socket.h>
+#include <pcap.h>
+
+typedef struct	s_scan_opt {
+	unsigned char		*packet;
+	size_t				packet_size;
+	struct sockaddr_in	*src;
+	struct sockaddr_in	*dst;
+	t_list				*port;
+	uint8_t				scan;
+	uint16_t			seq;
+}					t_scan_opt;
 
 typedef struct	s_psh {
-	u_int32_t		src_addr;
-	u_int32_t		dst_addr;
-	u_int8_t		placeholder;
-	u_int8_t		protocol;
-	u_int16_t		tcp_length;
+	uint32_t		src_addr;
+	uint32_t		dst_addr;
+	uint8_t			placeholder;
+	uint8_t			protocol;
+	uint16_t		tcp_length;
 	struct tcphdr	tcphdr;
 }				t_psh;
 
@@ -33,8 +45,7 @@ typedef struct	s_psh {
 ** SCAN FUNCTIONS
 */
 
-void			fill_tcp_packet(unsigned char *packet, size_t packet_size, struct sockaddr_in *src, struct sockaddr_in *dst, uint16_t port, uint8_t scan);
-uint8_t			send_tcp_packet(const unsigned char *packet, size_t packet_size, struct sockaddr_in *dst);
+uint8_t			send_tcp_packet(t_scan_opt *scan_opt, uint16_t *source);
 
 /*
 ** SCAN UTILS FUNCTIONS
@@ -50,5 +61,6 @@ unsigned short	get_checksum(unsigned short *packet, size_t size);
 
 uint8_t			error_scan(const char *msg);
 uint8_t			error_scan_errno(const char *msg);
+uint8_t			error_scan_pcap(pcap_if_t *list_if, pcap_t *handle, const char *msg, const char *name, const char *des);
 
 #endif

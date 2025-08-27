@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:36:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/14 00:25:28 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/25 15:42:56 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 uint8_t			get_local_sockaddr(struct sockaddr_in *local) {
 	struct sockaddr_in	tmp;
-	socklen_t 			locallen = sizeof(local);
+	socklen_t 			locallen = sizeof(*local);
 	int 				sock = 0;
 
 	bzero(&tmp, sizeof(tmp));

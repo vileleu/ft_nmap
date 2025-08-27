@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/24 00:15:38 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 23:20:11 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/27 14:50:21 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "ft_nmap.h"
 
 #define MIN_PORT_DEFAULT 1
-#define MAX_PORT_DEFAULT 65535
+#define MAX_PORT_DEFAULT 1024
 #define THREAD_DEFAULT 0
 
 #define SEPARATOR_STR ','
@@ -88,6 +88,7 @@ uint8_t     	same_list_addr(t_list_addr *list, char *host);
 uint8_t			same_list_nb(t_list *list, uint16_t nb);
 t_list_addr		*last_list_addr(t_list_addr *list);
 t_list			*last_list(t_list *list);
+uint32_t		count_list(t_list *list);
 
 t_ranged		atoi_ranged(const char *s);
 uint8_t			str_ishost(t_parse *parse, t_list_addr *list, char *host);

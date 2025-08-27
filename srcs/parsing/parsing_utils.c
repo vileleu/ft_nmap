@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 21:44:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/28 23:26:35 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/26 15:22:35 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ uint8_t		str_ishost(t_parse *parse, t_list_addr *list, char *host) {
 uint8_t		same_scan(uint8_t *scan, uint8_t check) {
 	uint8_t	i = 0;
 
-	while (i < MAX_SIZE_SCAN) {
+	while (i < SIZE_SCAN) {
 		if (scan[i] == check)
 			return (1);
 		i++;

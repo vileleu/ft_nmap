@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 23:07:01 by vileleu           #+#    #+#             */
-/*   Updated: 2025/07/30 17:50:37 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/26 15:20:23 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void	print_opt(t_opt *opt) {
 	printf("\n");
 	//scan
 	printf("Scans to be performed : ");
-	while (i < 6) {
+	while (i < SIZE_SCAN) {
 		switch (opt->scan[i]) {
 			case SYN:
 				printf("SYN");
@@ -97,7 +97,7 @@ void	print_opt(t_opt *opt) {
 			default:
 				break;
 		}
-		if (i++ < 6)
+		if (i++ < SIZE_SCAN)
 			printf(" ");
 	}
 	printf("\n");
