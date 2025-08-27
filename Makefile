@@ -24,7 +24,7 @@ DIR_INCS	= includes
 DIR_OBJS	= objects
 DIR_DEPS 	= dependencies
 
-SRCS		=	main.c opt.c init_scan_configuration.c\
+SRCS		=	main.c opt.c init_scan_configuration.c check_host_availability.c\
 				parsing/parsing.c parsing/parsing_opt.c parsing/parsing_arg.c parsing/parsing_list.c parsing/parsing_utils.c parsing/parsing_error.c
 
 INCS		= -I $(DIR_INCS)

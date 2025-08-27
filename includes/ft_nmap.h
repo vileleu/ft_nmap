@@ -99,4 +99,10 @@ void			print_opt(t_opt *opt);
 
 void			init_scan_configuration(t_opt *opt);
 
+/*
+** CHECK HOST FUNCTIONS
+*/
+
+int				check_host_availability(const char *ip_str);
+
 #endif

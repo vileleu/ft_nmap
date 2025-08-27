@@ -49,61 +49,64 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
     return threads;
 }
 
+// void print_port_list(t_list *ports) {
+//     t_list *tmp = ports;
+//     while (tmp) {
+//         printf("------------> %d", *(uint16_t *)tmp->data);
+//         tmp = tmp->next;
+//     }
+//     printf("\n");
+// }
+
 
 //list chaînée 
-t_list *copy_ports(t_list *source_ports, int start_index, int nb_ports_to_copy) {
-    t_list *copied_list_head = NULL;   // Tête de la nouvelle liste copiée
-    t_list *copied_list_tail = NULL;   // Queue """
-    int current_index = 0;             // Position actuelle dans la liste source
-    
-    //ex : start_index = 5 et ports_to_copy = 5, donc aller jusqu'a la place 10 
-    while (source_ports && current_index < start_index + nb_ports_to_copy) { 
-        if (current_index >= start_index) { //je copie  source_ports->data seulement lorsque j'arrive sur le debut de la sous-liste
-            // Création d'un nouveau nœud
-            t_list *new_port_node = malloc(sizeof(t_list));
-            if (!new_port_node) {
-                free_port_list(copied_list_head);
-                exit(EXIT_FAILURE);
-            }
+t_list *copy_ports(t_list *all_ports, int start, int count) {
+    for (int i = 0; i < start && all_ports; i++)
+        all_ports = all_ports->next;
 
-            // creation du type a l'interiteur
-            new_port_node->data = malloc(sizeof(uint16_t));
-            if (!new_port_node->data) {
-                free_port_list(copied_list_head);
-                exit(EXIT_FAILURE);
-            }
-            *(new_port_node->data) = *(source_ports->data); //copier
-            new_port_node->next = NULL;
+    t_list *result = NULL;
+    t_list *tail = NULL;
 
-            if (!copied_list_head) {
-                copied_list_head = new_port_node;
-            } else {
-                copied_list_tail->next = new_port_node;
-            }
-            copied_list_tail = new_port_node; // Mise à jour du dernier élément
+    for (int i = 0; i < count && all_ports; i++) {
+        t_list *new_node = malloc(sizeof(t_list));
+        if (!new_node) {
+            free_port_list(result);
+            exit(EXIT_FAILURE);
         }
-        source_ports = source_ports->next;
-        current_index++;
+        new_node->data = malloc(sizeof(uint16_t));
+        if (!new_node->data) {
+            free_port_list(result);
+            exit(EXIT_FAILURE);
+        }
+        *(new_node->data) = *(all_ports->data);
+        new_node->next = NULL;
+
+        if (!result)
+            result = new_node;
+        else
+            tail->next = new_node;
+        tail = new_node;
+
+        all_ports = all_ports->next;
     }
 
-    return copied_list_head;
+    return result;
 }
 
-
-t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_ports) {
-    int base_ports_per_thread = total_ports / opt->thread;
-    int extra_ports = total_ports % opt->thread;
-
+t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_ports) { 
     // car ex : 2 / 10 = 0
-    if (total_ports < opt->thread){
+    if (total_ports < opt->thread || !opt->thread) {
         printf("\nInsufficient ports per thread\n");
         exit(EXIT_FAILURE);
     }
 
+    int base_ports_per_thread = total_ports / opt->thread;
+    int extra_ports = total_ports % opt->thread;
+
     // debug a commenter
     printf("Répartition des ports :\n");
     printf("- %d ports par thread\n", base_ports_per_thread);
-    printf("- %d threads auront 1 port supplémentaire (pour équilibrer)\n", extra_ports);
+    printf("- %d thread(s) avec port supplémentaire (pour équilibrer)\n", extra_ports);
 
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
@@ -124,6 +127,8 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
         memcpy(threads_data[thread_index].scan, opt->scan, sizeof(uint8_t) * 6);
         port_index += ports_for_this_thread;
         printf("Thread %d → %d port(s)\n", thread_index + 1, ports_for_this_thread);
+        //debug //print_port_list(threads_data[thread_index].ports);
+
     }
 
     return threads_data;
