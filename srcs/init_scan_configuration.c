@@ -179,7 +179,7 @@ t_list *create_list_from_range(uint16_t min, uint16_t max) {
             exit(EXIT_FAILURE);
         }
         new_node->data = malloc(sizeof(uint16_t)); // Le champ data pointe vers un entier (uint16_t) contenant la valeur du port courant
-        if (!new_node) {
+        if (!new_node->data) {
             free_port_list(head);
             free(new_node);
             exit(EXIT_FAILURE);
