@@ -34,7 +34,7 @@ DEPS 		= $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$(OBJS))
 
 NAME		= ft_nmap
 CC			= gcc
-CFLAGS		= -Wall -Wextra -Werror -pthread -lpcap -g3 -fsanitize=address
+CFLAGS		= -Wall -Wextra -Werror -pthread -g3 -fsanitize=address
 OFLAGS		= -MMD -MP -MF $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$@)
 RM			= rm -rf
 

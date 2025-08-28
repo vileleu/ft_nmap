@@ -122,11 +122,6 @@ uint16_t		get_source_port() {
 }
 
 t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_ports) {
-    int base_ports_per_thread = total_ports / opt->thread;
-    int extra_ports = total_ports % opt->thread;
-	uint16_t	source = get_source_port();
-	uint8_t		total_scan = get_total_scan(opt->scan);
-
     // car ex : 2 / 10 = 0
     if (total_ports < opt->thread || !opt->thread) {
         printf("\nInsufficient ports per thread\n");
@@ -135,6 +130,8 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 
     int base_ports_per_thread = total_ports / opt->thread;
     int extra_ports = total_ports % opt->thread;
+    uint16_t	source = get_source_port();
+	uint8_t		total_scan = get_total_scan(opt->scan);
 
     // debug a commenter
     printf("Répartition des ports :\n");
