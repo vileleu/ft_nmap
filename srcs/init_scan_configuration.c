@@ -122,10 +122,13 @@ uint16_t		get_source_port() {
 }
 
 t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_ports) {
-    // car ex : 2 / 10 = 0
-    if (total_ports < opt->thread || !opt->thread) {
-        printf("\nInsufficient ports per thread\n");
-        exit(EXIT_FAILURE);
+    if (opt->thread <= 0) {
+        opt->thread = 1;
+    }
+	
+ 	// car ex : 2 / 10 = 0
+    if (opt->thread > total_ports) { // ajustement pour eviter une erreur
+        opt->thread = total_ports;
     }
 
     int base_ports_per_thread = total_ports / opt->thread;
@@ -155,7 +158,7 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
         threads_data[thread_index].addr = opt->targets->addr; // Assignation de l'IP cible à scanner pour ce thread
         threads_data[thread_index].ports = copy_ports(all_ports, port_index, ports_for_this_thread);// Copie la sous-liste de ports pour ce thread, ex : -> 0 | 1 | 2 | 3 | 4 | 5 |
 		threads_data[thread_index].source = source;
-		source += base_ports_per_thread * total_scan;
+		source += ports_for_this_thread * total_scan;
 		memcpy(threads_data[thread_index].scan, opt->scan, sizeof(uint8_t) * SIZE_SCAN);
         port_index += ports_for_this_thread;
         printf("Thread %d → %d port(s)\n", thread_index + 1, ports_for_this_thread);
