@@ -6,7 +6,7 @@
 #    By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/17 13:36:31 by vileleu           #+#    #+#              #
-#    Updated: 2025/08/26 21:46:11 by vileleu          ###   ########.fr        #
+#    Updated: 2025/09/01 17:17:11 by vileleu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ DIR_DEPS 	= dependencies
 
 SRCS		=	main.c opt.c init_scan_configuration.c \
 				parsing/parsing.c parsing/parsing_opt.c parsing/parsing_arg.c parsing/parsing_list.c parsing/parsing_utils.c parsing/parsing_error.c \
-				scan/scan_send.c scan/scan_receive.c scan/scan_tcp.c scan/scan_udp.c scan/scan_utils.c scan/scan_error.c
+				scan/scan_send.c scan/scan_tcp.c scan/scan_udp.c scan/scan_receive.c scan/scan_response.c scan/scan_utils.c scan/scan_error.c
 
 INCS		= -I $(DIR_INCS)
 OBJS 		= $(patsubst %.c,$(DIR_OBJS)/%.o,$(SRCS))

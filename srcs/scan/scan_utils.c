@@ -6,11 +6,34 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:36:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/25 15:42:56 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/01 15:57:41 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "scan.h"
+
+void			*free_list_result(t_list_result *list) {
+	t_list_result *tmp = list;
+	
+	while (list) {
+		tmp = list;
+		list = list->next;
+		free(tmp);
+		tmp = NULL;
+	}
+	return (NULL);
+}
+
+void			*free_pcap_data(t_pcap_data *p_data) {
+	if (p_data->l_result)
+		free_list_result(p_data->l_result);
+	if (p_data->filter_on)
+		pcap_freecode(&p_data->filter);
+	if (p_data->handle)
+		pcap_close(p_data->handle);
+	free(p_data);
+	return (NULL);
+}
 
 uint8_t			get_local_sockaddr(struct sockaddr_in *local) {
 	struct sockaddr_in	tmp;

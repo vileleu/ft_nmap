@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 19:32:58 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/26 21:45:45 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/01 18:12:27 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,16 +36,28 @@ void wait_for_threads(int thread_count, pthread_t *threads) {
     }
 }
 
+void	print_list_result(t_list_result *list) {
+	while (list) {
+		printf("port = %u, scan = %u\n", list->source, list->scan);
+		list = list->next;
+	}
+}
+
 void *scan_thread(void *arg) {
     t_thread_data *data = (t_thread_data *)arg;
-	uint16_t	count = 0;
     // Exemple basique pour test
     //printf("Thread started for IP %s\n", data->ip);
-	if (!(count = scan_send(&data->addr, data->ports, data->scan, data->source)))
+	t_pcap_data	*p_data;
+
+	if (!(p_data = init_pcap_data(data->ip, data->ports, data->source, data->count, data->scan)))
+		return (NULL);
+	//print_list_source(p_data->l_source);
+	if (scan_send(&data->addr, data->ports, data->source, data->scan)) {
+		free_pcap_data(p_data);
 		return NULL;
-	if (scan_receive(data->source, count))
-		return NULL;
-	//(void)data;
+	}
+	scan_receive(p_data);
+	free_pcap_data(p_data);
     return NULL;
 }
 
@@ -122,6 +134,7 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
     int extra_ports = total_ports % opt->thread;
 	uint16_t	source = get_source_port();
 	uint8_t		total_scan = get_total_scan(opt->scan);
+	uint16_t	total_send = base_ports_per_thread * total_scan;
 
     // car ex : 2 / 10 = 0
     if (total_ports < opt->thread){
@@ -148,10 +161,12 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
             ports_for_this_thread += 1;
 
         //remplissage du thread
-        threads_data[thread_index].addr = opt->targets->addr; // Assignation de l'IP cible à scanner pour ce thread
+        threads_data[thread_index].addr = opt->targets->addr;
+		threads_data[thread_index].ip = (const char *)opt->targets->data; // Assignation de l'IP cible à scanner pour ce thread
         threads_data[thread_index].ports = copy_ports(all_ports, port_index, ports_for_this_thread);// Copie la sous-liste de ports pour ce thread, ex : -> 0 | 1 | 2 | 3 | 4 | 5 |
 		threads_data[thread_index].source = source;
-		source += base_ports_per_thread * total_scan;
+		threads_data[thread_index].count = total_send;
+		source += total_send;
 		memcpy(threads_data[thread_index].scan, opt->scan, sizeof(uint8_t) * SIZE_SCAN);
         port_index += ports_for_this_thread;
         printf("Thread %d → %d port(s)\n", thread_index + 1, ports_for_this_thread);

@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/27 14:50:30 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/01 18:13:21 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <time.h>
 #include <pthread.h>
+#include <pcap.h>
 
 #define SIZE_SCAN 6
 
@@ -74,10 +75,39 @@ typedef struct	s_opt {
 
 typedef struct s_thread_data {
     struct sockaddr_in	addr;
+	const char			*ip;
     t_list 				*ports;  // Liste de ports pour ce thread
     uint8_t 			scan[SIZE_SCAN]; // Types de scan activés
 	uint16_t			source;
+	uint16_t			count;
 } t_thread_data;
+
+typedef struct	s_port_status {
+    uint8_t open:1;
+    uint8_t closed:1;
+    uint8_t filtered:1;
+    uint8_t unfiltered:1;
+    uint8_t open_filtered:1;
+	uint8_t	reserved:3;
+}				t_port_status;
+
+typedef struct	s_list_result {
+	uint16_t				source;
+	uint16_t				dest;
+	uint8_t					scan;
+	t_port_status			status;
+	struct s_list_result	*next;
+}				t_list_result;
+
+typedef struct	s_pcap_data {
+	t_list_result		*l_result;
+	pcap_t				*handle;
+	struct bpf_program	filter;
+	uint8_t				filter_on;
+	uint16_t			nb_packet;
+	struct timeval		tv;
+	int					fd;
+}				t_pcap_data;
 
 /*
 ** PARSING FUNCTIONS
@@ -89,8 +119,12 @@ t_opt			*parsing(const char **arg, const int len_arg);
 ** SCANS FUNCTIONS
 */
 
-uint16_t		scan_send(struct sockaddr_in *dst, t_list *port, uint8_t scan[SIZE_SCAN], uint16_t source);
-uint8_t			scan_receive(uint16_t source, uint16_t count);
+t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uint16_t count, uint8_t scan[SIZE_SCAN]);
+uint8_t			scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t source, uint8_t scan[SIZE_SCAN]);
+uint8_t			scan_receive(t_pcap_data *p_data);
+void			*free_pcap_data(t_pcap_data *p_data);
+
+uint8_t			get_total_scan(uint8_t scan[SIZE_SCAN]);
 
 /*
 ** OPT UTILS FUNCTIONS
@@ -106,5 +140,6 @@ void			print_opt(t_opt *opt);
 */
 
 void			init_scan_configuration(t_opt *opt);
+
 
 #endif

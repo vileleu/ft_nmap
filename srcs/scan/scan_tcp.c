@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:36:41 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/26 17:48:15 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/08/31 16:54:19 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static void	fill_tcp_packet(t_scan_opt *scan_opt) {
 	struct iphdr	*ip = (struct iphdr *)scan_opt->packet;
 	struct tcphdr	*tcp = (struct tcphdr *)(scan_opt->packet + sizeof(struct iphdr));
 
-	ip->ihl = 5;                                // ip header length (4 bytes / 1 word)
+	ip->ihl = (sizeof(struct iphdr) / 4);       // ip header length (4 bytes / 1 word)
 	ip->version = 4;                            // IPV4
 	ip->tos = 0;                                // type of service
     ip->tot_len = htons(scan_opt->packet_size); // size of packet (IP + TCP)
@@ -41,7 +41,7 @@ static void	fill_tcp_packet(t_scan_opt *scan_opt) {
 static void	set_tcp_port(const unsigned char *packet, uint16_t *port, uint16_t *source) {
 	struct iphdr	*ip = (struct iphdr *)packet;
 	struct tcphdr	*tcp = (struct tcphdr *)(packet + sizeof(struct iphdr));
-	t_psh			psh;
+	t_psh_tcp		psh;
 	
 	tcp->source = htons(*source);  // port source
     tcp->dest = htons(*port);      // port destination
@@ -53,7 +53,7 @@ static void	set_tcp_port(const unsigned char *packet, uint16_t *port, uint16_t *
 	psh.protocol = IPPROTO_TCP;
 	psh.tcp_length = htons(sizeof(struct tcphdr));
 	memcpy(&psh.tcphdr, tcp, sizeof(struct tcphdr));
-	tcp->check = get_checksum((uint16_t *)&psh, sizeof(psh)); // use struct t_psh for set up tcp checksum
+	tcp->check = get_checksum((uint16_t *)&psh, sizeof(psh)); // use struct t_psh_tcp for set up tcp checksum
 }
 
 uint8_t	send_tcp_packet(t_scan_opt *scan_opt, uint16_t *source) {
@@ -67,7 +67,7 @@ uint8_t	send_tcp_packet(t_scan_opt *scan_opt, uint16_t *source) {
 	if ((setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one))) < 0)
 		return (error_scan_errno("setsockopt"));
 	while (tmp) {
-		printf("source = %u, htons(source) = %u\n", *source, htons(*source));
+		printf("send tcp packet: source = %u\n", *source);
 		scan_opt->dst->sin_port = *(tmp->data);
 		set_tcp_port(scan_opt->packet, tmp->data, source);
 		if ((sendto(sock, scan_opt->packet, scan_opt->packet_size, 0, (struct sockaddr *)scan_opt->dst, sizeof(*scan_opt->dst))) < 0)
@@ -76,6 +76,5 @@ uint8_t	send_tcp_packet(t_scan_opt *scan_opt, uint16_t *source) {
 		(*source)++;
 	}
 	close(sock);
-	printf("success!\n");
 	return (EXIT_SUCCESS);
 }
