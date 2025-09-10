@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 23:50:07 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/31 17:02:04 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/08 18:41:28 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ uint8_t		send_udp_packet(t_scan_opt *scan_opt, uint16_t *source) {
 	if ((setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one))) < 0)
 		return (error_scan_errno("setsockopt"));
 	while (tmp) {
-		printf("send udp packet: source = %u\n", *source);
 		scan_opt->dst->sin_port = *(tmp->data);
 		set_udp_port(scan_opt->packet, tmp->data, source);
 		if ((sendto(sock, scan_opt->packet, scan_opt->packet_size, 0, (struct sockaddr *)scan_opt->dst, sizeof(*scan_opt->dst))) < 0)

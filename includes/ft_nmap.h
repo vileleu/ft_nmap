@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/01 18:13:21 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/08 17:29:04 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,15 +73,6 @@ typedef struct	s_opt {
 	uint8_t		scan[SIZE_SCAN];
 }				t_opt;
 
-typedef struct s_thread_data {
-    struct sockaddr_in	addr;
-	const char			*ip;
-    t_list 				*ports;  // Liste de ports pour ce thread
-    uint8_t 			scan[SIZE_SCAN]; // Types de scan activés
-	uint16_t			source;
-	uint16_t			count;
-} t_thread_data;
-
 typedef struct	s_port_status {
     uint8_t open:1;
     uint8_t closed:1;
@@ -90,6 +81,24 @@ typedef struct	s_port_status {
     uint8_t open_filtered:1;
 	uint8_t	reserved:3;
 }				t_port_status;
+
+typedef struct	s_final_status {
+	uint16_t				port;
+	uint8_t 				scan[SIZE_SCAN];
+	t_port_status			status[SIZE_SCAN];
+	uint8_t					conclusion;
+	struct s_final_status	*next;
+}				t_final_status;
+
+typedef struct s_thread_data {
+    struct sockaddr_in	addr;
+	const char			*ip;
+    t_list 				*ports;  // Liste de ports pour ce thread
+    uint8_t 			scan[SIZE_SCAN]; // Types de scan activés
+	uint16_t			source;
+	uint16_t			count;
+	t_final_status		*final_status;
+} t_thread_data;
 
 typedef struct	s_list_result {
 	uint16_t				source;
@@ -121,7 +130,7 @@ t_opt			*parsing(const char **arg, const int len_arg);
 
 t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uint16_t count, uint8_t scan[SIZE_SCAN]);
 uint8_t			scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t source, uint8_t scan[SIZE_SCAN]);
-uint8_t			scan_receive(t_pcap_data *p_data);
+uint8_t			scan_receive(t_pcap_data *p_data, t_final_status *final_status);
 void			*free_pcap_data(t_pcap_data *p_data);
 
 uint8_t			get_total_scan(uint8_t scan[SIZE_SCAN]);
@@ -139,7 +148,27 @@ void			print_opt(t_opt *opt);
 ** INIT SCAN FUNCTIONS
 */
 
-void			init_scan_configuration(t_opt *opt);
+void			init_scan_configuration(t_opt *opt, t_final_status *f_s);
 
+/*
+** CHECK HOST FUNCTIONS
+*/
+
+int				check_host_availability(const char *ip_str);
+
+/*
+** STATUS FUNCTIONS
+*/
+
+uint8_t			create_final_status(t_final_status **final_status, t_opt *opt);
+void			print_conclusion(t_final_status *final_status);
+void			free_final_status(t_final_status *final_status);
+
+/*
+** ERROR FUNCTIONS
+*/
+
+uint8_t			error_all(const char *msg);
+uint8_t			error_all_errno(const char *msg);
 
 #endif

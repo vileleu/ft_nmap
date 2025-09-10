@@ -6,33 +6,30 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/31 02:35:53 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/01 18:17:55 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/08 18:35:48 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "scan.h"
 
-static void	print_status(const t_port_status status) {
-	if (status.open)
-		printf("open");
-	else if (status.closed)
-		printf("closed");
-	else if (status.filtered)
-		printf("filtered");
-	else if (status.open_filtered)
-		printf("open_filtered");
-	else if (status.unfiltered)
-		printf("unfiltered");
-	else
-		return;
-}
-
-void	print_conclusion(t_list_result *result) {
-	while (result) {
-		printf("port source = %u, port destination = %u: ", result->source, result->dest);
-		print_status(result->status);
-		printf("\n");
-		result = result->next;
+void	write_conclusion(t_list_result *result, t_final_status *final_status) {
+	t_list_result	*tmp = result;
+	uint8_t			i = 0;
+	
+	while (final_status) {
+		tmp = result;
+		i = 0;
+		while (tmp) {
+			if (final_status->port == tmp->dest) {
+				final_status->scan[i] = tmp->scan;
+				final_status->status[i] = tmp->status;
+				if (final_status->scan[i] == SYN && final_status->status[i].open)
+					final_status->conclusion = 1;
+				i++;
+			}
+			tmp = tmp->next;
+		}
+		final_status = final_status->next;
 	}
 }
 

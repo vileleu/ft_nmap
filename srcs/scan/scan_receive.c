@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:45:54 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/08 14:12:17 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/08 18:41:40 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,9 @@ static void	packet_handler(unsigned char *arg, const struct pcap_pkthdr *packet_
 	const struct udphdr			*udp = NULL;
 	uint16_t					packet_port_dst = 0;
 
+	(void)packet_header;
 	// packet_header->len = size of full packet (don't need it)
-    printf("Packet capture length: %d\n", packet_header->caplen);
+    // printf("Packet capture length: %d\n", packet_header->caplen);
 	// skip ethernet header
 	packet = packet + sizeof(struct ether_header);
 	ip = (struct iphdr *)(packet);
@@ -142,7 +143,7 @@ static void	packet_handler(unsigned char *arg, const struct pcap_pkthdr *packet_
     return;
 }
 
-uint8_t			scan_receive(t_pcap_data *p_data) {
+uint8_t			scan_receive(t_pcap_data *p_data, t_final_status *final_status) {
 	fd_set 			fds;
 	struct timeval	tv;
 	int 			ret = 0;
@@ -156,14 +157,12 @@ uint8_t			scan_receive(t_pcap_data *p_data) {
 		    n = pcap_dispatch(p_data->handle, p_data->nb_packet, packet_handler, (unsigned char *)p_data->l_result);
 			p_data->nb_packet -= n;
 		}
-		else if (!ret) {
-		    printf("Timeout select\n");
+		else if (!ret)
 			break;
-		}
 		else {
 		    return (error_scan_errno("select"));
 		}
 	}
-	print_conclusion(p_data->l_result);
+	write_conclusion(p_data->l_result, final_status);
 	return (EXIT_SUCCESS);
 }
