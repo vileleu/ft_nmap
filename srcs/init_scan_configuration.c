@@ -66,7 +66,6 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
     // de tous les threads pour les wait
     pthread_t *threads = malloc(sizeof(pthread_t) * opt->thread);
     if (!threads) {
-        //free(threads);
         exit(EXIT_FAILURE);
     }
 
@@ -156,7 +155,6 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
-        //free(threads_data);
         exit(EXIT_FAILURE);
     }
 
@@ -220,11 +218,29 @@ t_list *create_list_from_range(uint16_t min, uint16_t max) {
 }
 
 //preparer pour allocate_thread_data
-t_list *prepare_all_ports(t_port *port) {
+t_list *prepare_all_ports(t_port *port, int total_ports) {
     if (port->isranged)
         return create_list_from_range(port->min, port->max);
+
     if (port->islist)
         return port->list;
+
+    if (total_ports == 1) { //cree une liste de 1
+        t_list *list = malloc(sizeof(t_list));
+        if (!list) {
+            free(list);
+            exit(EXIT_FAILURE);
+        }
+        list->data = malloc(sizeof(uint16_t));
+        if (!list->data) {
+            free(list);
+            exit(EXIT_FAILURE);
+        }
+        *(list->data) = port->min;
+        list->next = NULL;
+        return list;
+    }
+
     return NULL;
 }
 
@@ -253,13 +269,14 @@ int get_total_ports(t_port *port) {
 
 void init_scan_configuration(t_opt *opt, t_final_status *f_s) {
     int total_ports = get_total_ports(&opt->port);
-    t_list *all_ports = prepare_all_ports(&opt->port);
+    t_list *all_ports = prepare_all_ports(&opt->port, total_ports);
     t_thread_data *threads_data = allocate_thread_data(opt, all_ports, total_ports, f_s);
     pthread_t *threads = launch_threads(opt, threads_data); //lancement des threads
 
     wait_for_threads(opt->thread, threads);
     cleanup_threads(opt->thread, threads, threads_data);
 
-    if (opt->port.isranged)
+    if (opt->port.isranged || total_ports == 1) {
         free_port_list(all_ports);
+    }
 }

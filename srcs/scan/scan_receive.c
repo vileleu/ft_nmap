@@ -66,7 +66,7 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
     char				error_buffer[PCAP_ERRBUF_SIZE];
     char				filter_exp[100];
 	bpf_u_int32			ip_bpf = 0;
-	struct timeval		*tv_pointer = NULL;
+	const struct timeval		*tv_pointer = NULL;
 
 	if (!(p_data = malloc(sizeof(t_pcap_data)))) {
 			error_scan_errno("malloc");
@@ -101,7 +101,7 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
 		return (error_scan_pcap(p_data, "pcap_get_selectable_fd", pcap_geterr(p_data->handle)));
 	// on windows pcap give a special timeout for select
 	if ((tv_pointer = pcap_get_required_select_timeout(p_data->handle)))
-		p_data->tv = *tv_pointer;
+		p_data->tv = *tv_pointer; //p_data->tv = *tv_pointer;
 	else {
 		p_data->tv.tv_sec = 3;
 		p_data->tv.tv_usec = 0;

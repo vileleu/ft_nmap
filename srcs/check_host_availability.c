@@ -69,8 +69,15 @@ int init_sockaddr_in(struct sockaddr_in *addr, const char *ip_str) {
     return 1;
 }
 
+int udp_ping(const char *ip_str) {
 
-int check_host_availability(const char *ip_str) {
+}
+
+int tcp_ping(const char *ip_str) {
+
+}
+
+int icmp_ping(const char *ip_str) {
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (sockfd < 0) {
 		perror("socket");
@@ -94,4 +101,18 @@ int check_host_availability(const char *ip_str) {
     int result = send_and_receive(sockfd, &addr, packet, packet_len);
     close(sockfd);
     return result;
+}
+
+
+int check_host_availability(const char *ip_str) {
+    if (icmp_ping(ip_str))
+        return 1;
+
+    // if (tcp_ping(ip_str, 80) || tcp_ping(ip_str, 443))
+    //     return 1;
+
+    // if (udp_ping(ip_str, 53))
+    //     return 1;
+
+    return 0;
 }
