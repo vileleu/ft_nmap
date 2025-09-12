@@ -116,3 +116,8 @@ int check_host_availability(const char *ip_str) {
 
     return 0;
 }
+
+// IDEE IMPLEMENtATION :
+// je vais voir le scan saisit dans la ligne de commande au debut pour faire ICMP + TCP SYN/ACK 
+// pour tous les scans sauf pour UDP ou y'aura ICMP + TCP + UDP, et je vais pas envoyer tous les check_host en meme 
+// temps je vais regarder le retour de ICMP et si ca fonctionne pas je passe dans les autres
