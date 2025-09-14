@@ -154,7 +154,7 @@ void			init_scan_configuration(t_opt *opt, t_final_status *f_s);
 ** CHECK HOST FUNCTIONS
 */
 
-int				check_host_availability(const char *ip_str);
+int				check_host_availability(const char *ip_str, t_opt *opt);
 
 /*
 ** STATUS FUNCTIONS

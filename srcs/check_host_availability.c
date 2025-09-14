@@ -69,13 +69,13 @@ int init_sockaddr_in(struct sockaddr_in *addr, const char *ip_str) {
     return 1;
 }
 
-int udp_ping(const char *ip_str) {
+// int udp_ping(const char *ip_str) {
 
-}
+// }
 
-int tcp_ping(const char *ip_str) {
+// int tcp_ping(const char *ip_str) {
 
-}
+// }
 
 int icmp_ping(const char *ip_str) {
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
@@ -104,20 +104,22 @@ int icmp_ping(const char *ip_str) {
 }
 
 
-int check_host_availability(const char *ip_str) {
-    if (icmp_ping(ip_str))
-        return 1;
+int check_host_availability(const char *ip_str, t_opt *opt) {
+    if (icmp_ping(ip_str) == 0)
+        return 1; //si ca a repondu on sort de la fonction
 
-    // if (tcp_ping(ip_str, 80) || tcp_ping(ip_str, 443))
+    // fonction a dev ou appeller ?
+    // if (tcp_ping(ip_str, 443) == 0 || tcp_ping(ip_str, 80) == 0) //syn + ack
     //     return 1;
 
-    // if (udp_ping(ip_str, 53))
-    //     return 1;
-
+    // // UDP ping seulement si saisit
+    // for (int i = 0; i < SIZE_SCAN; i++) {
+    //     if (opt->scan[i] == UDP) {
+    //         if (udp_ping(ip_str, 53) == 0) {
+    //             return 1;
+    //         }
+    //         break;
+    //     }
+    // }
     return 0;
 }
-
-// IDEE IMPLEMENtATION :
-// je vais voir le scan saisit dans la ligne de commande au debut pour faire ICMP + TCP SYN/ACK 
-// pour tous les scans sauf pour UDP ou y'aura ICMP + TCP + UDP, et je vais pas envoyer tous les check_host en meme 
-// temps je vais regarder le retour de ICMP et si ca fonctionne pas je passe dans les autres

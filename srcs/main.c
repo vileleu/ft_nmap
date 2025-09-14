@@ -17,7 +17,7 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
 
     while (current) {
         // current->data contient les IP
-        if (!check_host_availability(current->data)) {
+        if (!check_host_availability(current->data, opt)) {
             printf("Host %s is unreachable.\n", current->data);
             return 1;
         } else {
@@ -45,7 +45,7 @@ int main(const int ac, const char **av) {
     int scan_result = run_scan(opt, final_status);
     if (scan_result == 1) {
         free_opt(opt);             
-        free_port_list(final_status);
+        free_final_status(final_status);
         return EXIT_FAILURE;
     }
 	print_conclusion(final_status);
