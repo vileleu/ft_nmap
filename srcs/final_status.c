@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 15:56:52 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/10 19:19:41 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/16 18:57:24 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,32 @@ static char	*print_scan(const uint8_t scan) {
 	}
 }
 
+static char *print_service(const uint16_t port, const uint8_t scan[SIZE_SCAN]) {
+	struct servent	*service = NULL;
+	char			protocol[] = "tcp";
+	
+	if (scan[0] == UDP && !scan[1])
+		strcpy(protocol, "udp");
+	service = getservbyport(htons(port), protocol);
+    if (service)
+        return (service->s_name);
+	else
+        return ("Unassigned");
+}
+
+static char*	print_end(uint8_t conclusion) {
+	if (conclusion == OPEN)
+		return ("open");
+	else if (conclusion == CLOSED)
+		return ("closed");
+	else if (conclusion == FILTERED)
+		return ("filtered");
+	else if (conclusion == UNFILTERED)
+		return ("unfiltered");
+	else
+		return ("filtered");
+}
+
 void	print_conclusion(t_final_status *final_status) {
 	t_final_status	*tmp = final_status;
 	char			print_s[21] = "";
@@ -66,10 +92,10 @@ void	print_conclusion(t_final_status *final_status) {
 	printf("%-7s%-15s%-108s%-10s\n", "Port", "Service Name", "Results", "Conclusion");
 	printf("--------------------------------------------------------------------------------------------------------------------------------------------\n");
 	while (tmp) {
-		if (tmp->conclusion) {
+		if (tmp->conclusion == OPEN) {
 			i = 0;
 			printf("%-7u", tmp->port);
-			printf("%-15s", "none");
+			printf("%-15s", print_service(tmp->port, tmp->scan));
 			bzero(print_a, 110);
 			while (i < SIZE_SCAN && tmp->scan[i]) {
 				sprintf(print_s, (i ? " %s(%s)" : "%s(%s)"), print_scan(tmp->scan[i]), print_status(tmp->status[i]));
@@ -77,7 +103,7 @@ void	print_conclusion(t_final_status *final_status) {
 				i++;
 			}
 			printf("%-108s", print_a);
-			printf("%-10s", "open");
+			printf("%-10s", print_end(tmp->conclusion));
 			printf("\n");	
 		}
 		tmp = tmp->next;
@@ -88,10 +114,10 @@ void	print_conclusion(t_final_status *final_status) {
 	printf("%-7s%-15s%-108s%-10s\n", "Port", "Service Name", "Results", "Conclusion");
 	printf("--------------------------------------------------------------------------------------------------------------------------------------------\n");
 	while (tmp) {
-		if (!tmp->conclusion) {
+		if (tmp->conclusion != OPEN) {
 			i = 0;
 			printf("%-7u", tmp->port);
-			printf("%-15s", "none");
+			printf("%-15s", print_service(tmp->port, tmp->scan));
 			bzero(print_a, 110);
 			while (i < SIZE_SCAN && tmp->scan[i]) {
 				sprintf(print_s, (i ? " %s(%s)" : "%s(%s)"), print_scan(tmp->scan[i]), print_status(tmp->status[i]));
@@ -99,7 +125,7 @@ void	print_conclusion(t_final_status *final_status) {
 				i++;
 			}
 			printf("%-108s", print_a);
-			printf("%-10s", "closed");
+			printf("%-10s", print_end(tmp->conclusion));
 			printf("\n");	
 		}
 		tmp = tmp->next;

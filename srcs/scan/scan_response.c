@@ -6,13 +6,56 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/31 02:35:53 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/08 18:35:48 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/16 18:51:59 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "scan.h"
 
-void	write_conclusion(t_list_result *result, t_final_status *final_status) {
+static void	get_conclusion(t_final_status *final_status, uint8_t i) {
+	if (final_status->scan[i] == SYN) {
+		if (final_status->status[i].open)
+			final_status->conclusion = OPEN;
+		else if (final_status->status[i].closed)
+			final_status->conclusion = CLOSED;
+		else if (final_status->status[i].filtered)
+			final_status->conclusion = FILTERED;
+	}
+	if (final_status->scan[i] == UDP && !final_status->conclusion) {
+		if (final_status->status[i].open)
+			final_status->conclusion = OPEN;
+		else if (final_status->status[i].closed)
+			final_status->conclusion = CLOSED;
+		else if (final_status->status[i].filtered)
+			final_status->conclusion = FILTERED;
+	}
+	if (final_status->scan[i] == ACK && !final_status->conclusion) {
+		if (final_status->status[i].filtered)
+			final_status->conclusion = FILTERED;
+		else if (final_status->status[i].unfiltered)
+			final_status->conclusion = UNFILTERED;
+	}
+	if (final_status->scan[i] == NUL && !final_status->conclusion) {
+		if (final_status->status[i].closed)
+			final_status->conclusion = CLOSED;
+		if (final_status->status[i].filtered)
+			final_status->conclusion = FILTERED;
+	}
+	if (final_status->scan[i] == FIN && !final_status->conclusion) {
+		if (final_status->status[i].closed)
+			final_status->conclusion = CLOSED;
+		if (final_status->status[i].filtered)
+			final_status->conclusion = FILTERED;
+	}
+	if (final_status->scan[i] == XMAS && !final_status->conclusion) {
+		if (final_status->status[i].closed)
+			final_status->conclusion = CLOSED;
+		if (final_status->status[i].filtered)
+			final_status->conclusion = FILTERED;
+	}
+}
+
+void		write_conclusion(t_list_result *result, t_final_status *final_status) {
 	t_list_result	*tmp = result;
 	uint8_t			i = 0;
 	
@@ -23,8 +66,7 @@ void	write_conclusion(t_list_result *result, t_final_status *final_status) {
 			if (final_status->port == tmp->dest) {
 				final_status->scan[i] = tmp->scan;
 				final_status->status[i] = tmp->status;
-				if (final_status->scan[i] == SYN && final_status->status[i].open)
-					final_status->conclusion = 1;
+				get_conclusion(final_status, i);
 				i++;
 			}
 			tmp = tmp->next;
@@ -33,7 +75,7 @@ void	write_conclusion(t_list_result *result, t_final_status *final_status) {
 	}
 }
 
-void	get_response_unreach(const unsigned char *packet, t_list_result *result) {
+void		get_response_unreach(const unsigned char *packet, t_list_result *result) {
 	const struct iphdr			*ip = (struct iphdr *)packet;
 	const struct icmphdr		*icmp = (struct icmphdr *)(packet + (ip->ihl * 4));
 	const struct iphdr			*myip = (struct iphdr *)(packet + (ip->ihl * 4 + sizeof(struct icmphdr)));
@@ -71,7 +113,7 @@ void	get_response_unreach(const unsigned char *packet, t_list_result *result) {
 	}
 }
 
-void	get_response(const unsigned char *packet, t_list_result *result) {
+void		get_response(const unsigned char *packet, t_list_result *result) {
 	const struct iphdr			*ip = (struct iphdr *)packet;
 	const struct tcphdr			*tcp = (ip->protocol == IPPROTO_TCP ? (struct tcphdr *)(packet + (ip->ihl * 4)) : NULL);
 

@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/08 17:29:04 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/16 18:39:56 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/in.h>
 #include <time.h>
@@ -38,6 +39,12 @@
 #define MAX_RANGE_SCAN 1024
 #define MIN_PORT_SOURCE 30000
 #define MAX_PORT_SOURCE (MAX_PORT - MAX_RANGE_SCAN * SIZE_SCAN)
+
+#define NONE 0
+#define OPEN 1
+#define CLOSED 2
+#define FILTERED 3
+#define UNFILTERED 4
 
 #define SYN 1
 #define NUL 2
@@ -134,6 +141,7 @@ uint8_t			scan_receive(t_pcap_data *p_data, t_final_status *final_status);
 void			*free_pcap_data(t_pcap_data *p_data);
 
 uint8_t			get_total_scan(uint8_t scan[SIZE_SCAN]);
+uint16_t		get_source_port();
 
 /*
 ** OPT UTILS FUNCTIONS
