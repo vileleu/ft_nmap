@@ -69,13 +69,50 @@ int init_sockaddr_in(struct sockaddr_in *addr, const char *ip_str) {
     return 1;
 }
 
-// int udp_ping(const char *ip_str) {
 
-// }
+uint8_t tcp_ping(const char *ip_str) {
+    t_list *only443 = NULL;
+    t_list *only80 = NULL;
+    uint16_t source = get_source_port();
+    uint8_t scan[SIZE_SCAN] = {0};
+    struct sockaddr_in dst;
 
-// int tcp_ping(const char *ip_str) {
+    if (!init_sockaddr_in(&dst, ip_str))
+        return 0;
 
-// }
+    // allocation port 443
+    if (!(only443 = malloc(sizeof(t_list))))
+        return (error_all_errno("malloc"));
+    if (!(only443->data = malloc(sizeof(uint16_t))))
+        return (error_all_errno("malloc"));
+    *(uint16_t *)(only443->data) = 443;
+    only443->next = NULL;
+
+    // allocation port 80
+    if (!(only80 = malloc(sizeof(t_list))))
+        return (error_all_errno("malloc"));
+    if (!(only80->data = malloc(sizeof(uint16_t))))
+        return (error_all_errno("malloc"));
+    *(uint16_t *)(only80->data) = 80;
+    only80->next = NULL;
+
+    // envoi SYN sur 443
+    scan[0] = SYN;
+    scan_send(&dst, only443, source, scan);
+
+    // envoi ACK sur 80
+    scan[0] = ACK;
+    scan_send(&dst, only80, source, scan);
+
+    // libération mémoire
+    free(only443->data);
+    free(only443);
+    free(only80->data);
+    free(only80);
+
+    return 1;
+}
+
 
 int icmp_ping(const char *ip_str) {
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
@@ -104,22 +141,14 @@ int icmp_ping(const char *ip_str) {
 }
 
 
-int check_host_availability(const char *ip_str, t_opt *opt) {
-    if (icmp_ping(ip_str) == 0)
-        return 1; //si ca a repondu on sort de la fonction
+int check_host_availability(const char *ip_str) {
+    if (icmp_ping(ip_str) == 0) {
+        return 1;
+    }
 
-    // fonction a dev ou appeller ?
-    // if (tcp_ping(ip_str, 443) == 0 || tcp_ping(ip_str, 80) == 0) //syn + ack
-    //     return 1;
+    if (tcp_ping(ip_str)) {
+        return 1;
+    }
 
-    // // UDP ping seulement si saisit
-    // for (int i = 0; i < SIZE_SCAN; i++) {
-    //     if (opt->scan[i] == UDP) {
-    //         if (udp_ping(ip_str, 53) == 0) {
-    //             return 1;
-    //         }
-    //         break;
-    //     }
-    // }
     return 0;
 }
