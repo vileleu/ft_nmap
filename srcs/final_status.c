@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 15:56:52 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/16 18:57:24 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/17 16:19:11 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,10 @@ static char	*print_scan(const uint8_t scan) {
 	}
 }
 
-static char *print_service(const uint16_t port, const uint8_t scan[SIZE_SCAN]) {
+static char *print_service(const uint16_t port) {
 	struct servent	*service = NULL;
-	char			protocol[] = "tcp";
 	
-	if (scan[0] == UDP && !scan[1])
-		strcpy(protocol, "udp");
-	service = getservbyport(htons(port), protocol);
+	service = getservbyport(htons(port), NULL);
     if (service)
         return (service->s_name);
 	else
@@ -95,7 +92,7 @@ void	print_conclusion(t_final_status *final_status) {
 		if (tmp->conclusion == OPEN) {
 			i = 0;
 			printf("%-7u", tmp->port);
-			printf("%-15s", print_service(tmp->port, tmp->scan));
+			printf("%-15s", print_service(tmp->port));
 			bzero(print_a, 110);
 			while (i < SIZE_SCAN && tmp->scan[i]) {
 				sprintf(print_s, (i ? " %s(%s)" : "%s(%s)"), print_scan(tmp->scan[i]), print_status(tmp->status[i]));
@@ -117,7 +114,7 @@ void	print_conclusion(t_final_status *final_status) {
 		if (tmp->conclusion != OPEN) {
 			i = 0;
 			printf("%-7u", tmp->port);
-			printf("%-15s", print_service(tmp->port, tmp->scan));
+			printf("%-15s", print_service(tmp->port));
 			bzero(print_a, 110);
 			while (i < SIZE_SCAN && tmp->scan[i]) {
 				sprintf(print_s, (i ? " %s(%s)" : "%s(%s)"), print_scan(tmp->scan[i]), print_status(tmp->status[i]));
