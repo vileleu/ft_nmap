@@ -29,6 +29,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <pcap.h>
+#include <sys/time.h>
 
 #define SIZE_SCAN 6
 

@@ -16,13 +16,20 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
     t_list_addr *current = opt->targets;
 
     while (current) {
-        // current->data contient les IP
         if (!check_host_availability(current->data)) {
             printf("Host %s is unreachable.\n", current->data);
             return 1;
-        } else {
+        } 
+        else {
             printf("Host %s is up.\n", current->data);
-            init_scan_configuration(opt, f_s);
+            struct timeval t_scan_start, t_scan_end;
+            gettimeofday(&t_scan_start, NULL); //calcul temps du/des scan
+            init_scan_configuration(opt, f_s); 
+            gettimeofday(&t_scan_end, NULL);
+            double total_sec = (t_scan_end.tv_sec - t_scan_start.tv_sec)
+                             + (t_scan_end.tv_usec - t_scan_start.tv_usec) / 1000000.0;
+
+            printf("Scan took %.5f secs\n\n", total_sec);
         }
         current = current->next;
     }

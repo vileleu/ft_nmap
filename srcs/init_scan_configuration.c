@@ -149,9 +149,9 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 	uint16_t	total_send = 0;
 
     // debug a commenter
-    printf("Répartition des ports :\n");
-    printf("- %d ports par thread\n", base_ports_per_thread);
-    printf("- %d thread(s) avec port supplémentaire (pour équilibrer)\n", extra_ports);
+    // printf("Répartition des ports :\n");
+    // printf("- %d ports par thread\n", base_ports_per_thread);
+    // printf("- %d thread(s) avec port supplémentaire (pour équilibrer)\n", extra_ports);
 
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
@@ -236,7 +236,7 @@ t_list *prepare_all_ports(t_port *port, int total_ports) {
             free(list);
             exit(EXIT_FAILURE);
         }
-        *(list->data) = port->min;
+        *(list->data) = port->port;
         list->next = NULL;
         return list;
     }
