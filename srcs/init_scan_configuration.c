@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 19:32:58 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/08 16:58:33 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/09/17 17:48:58 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,22 +36,12 @@ void wait_for_threads(int thread_count, pthread_t *threads) {
     }
 }
 
-void	print_list_result(t_list_result *list) {
-	while (list) {
-		printf("port = %u, scan = %u\n", list->source, list->scan);
-		list = list->next;
-	}
-}
-
 void *scan_thread(void *arg) {
     t_thread_data *data = (t_thread_data *)arg;
-    // Exemple basique pour test
-    //printf("Thread started for IP %s\n", data->ip);
 	t_pcap_data	*p_data;
 
 	if (!(p_data = init_pcap_data(data->ip, data->ports, data->source, data->count, data->scan)))
 		return (NULL);
-	//print_list_source(p_data->l_source);
 	if (scan_send(&data->addr, data->ports, data->source, data->scan)) {
 		free_pcap_data(p_data);
 		return NULL;
@@ -66,7 +56,6 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
     // de tous les threads pour les wait
     pthread_t *threads = malloc(sizeof(pthread_t) * opt->thread);
     if (!threads) {
-        //free(threads);
         exit(EXIT_FAILURE);
     }
 
@@ -76,16 +65,6 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
 
     return threads;
 }
-
-// void print_port_list(t_list *ports) {
-//     t_list *tmp = ports;
-//     while (tmp) {
-//         printf("------------> %d", *(uint16_t *)tmp->data);
-//         tmp = tmp->next;
-//     }
-//     printf("\n");
-// }
-
 
 //list chaînée 
 t_list *copy_ports(t_list *all_ports, int start, int count) {
@@ -149,14 +128,8 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 	uint8_t		total_scan = get_total_scan(opt->scan);
 	uint16_t	total_send = 0;
 
-    // debug a commenter
-    printf("Répartition des ports :\n");
-    printf("- %d ports par thread\n", base_ports_per_thread);
-    printf("- %d thread(s) avec port supplémentaire (pour équilibrer)\n", extra_ports);
-
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
-        //free(threads_data);
         exit(EXIT_FAILURE);
     }
 
@@ -178,9 +151,6 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 		source += total_send;
 		memcpy(threads_data[thread_index].scan, opt->scan, sizeof(uint8_t) * SIZE_SCAN);
         port_index += ports_for_this_thread;
-        printf("Thread %d → %d port(s)\n", thread_index + 1, ports_for_this_thread);
-        //debug //print_port_list(threads_data[thread_index].ports);
-
     }
 
     return threads_data;
@@ -220,11 +190,29 @@ t_list *create_list_from_range(uint16_t min, uint16_t max) {
 }
 
 //preparer pour allocate_thread_data
-t_list *prepare_all_ports(t_port *port) {
+t_list *prepare_all_ports(t_port *port, int total_ports) {
     if (port->isranged)
         return create_list_from_range(port->min, port->max);
+
     if (port->islist)
         return port->list;
+
+    if (total_ports == 1) { //cree une liste de 1
+        t_list *list = malloc(sizeof(t_list));
+        if (!list) {
+            free(list);
+            exit(EXIT_FAILURE);
+        }
+        list->data = malloc(sizeof(uint16_t));
+        if (!list->data) {
+            free(list);
+            exit(EXIT_FAILURE);
+        }
+        *(list->data) = port->port;
+        list->next = NULL;
+        return list;
+    }
+
     return NULL;
 }
 
@@ -253,13 +241,14 @@ int get_total_ports(t_port *port) {
 
 void init_scan_configuration(t_opt *opt, t_final_status *f_s) {
     int total_ports = get_total_ports(&opt->port);
-    t_list *all_ports = prepare_all_ports(&opt->port);
+    t_list *all_ports = prepare_all_ports(&opt->port, total_ports);
     t_thread_data *threads_data = allocate_thread_data(opt, all_ports, total_ports, f_s);
     pthread_t *threads = launch_threads(opt, threads_data); //lancement des threads
 
     wait_for_threads(opt->thread, threads);
     cleanup_threads(opt->thread, threads, threads_data);
 
-    if (opt->port.isranged)
+    if (opt->port.isranged || total_ports == 1) {
         free_port_list(all_ports);
+    }
 }

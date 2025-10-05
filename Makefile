@@ -6,7 +6,7 @@
 #    By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/17 13:36:31 by vileleu           #+#    #+#              #
-#    Updated: 2025/09/08 16:49:14 by vileleu          ###   ########.fr        #
+#    Updated: 2025/09/24 14:18:22 by vileleu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ DEPS 		= $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$(OBJS))
 
 NAME		= ft_nmap
 CC			= gcc
-CFLAGS		= -Wall -Wextra -Werror -pthread -lpcap -g3 -fsanitize=address
+CFLAGS		= -Wall -Wextra -Werror -lpcap -pthread 
 OFLAGS		= -MMD -MP -MF $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$@)
 RM			= rm -rf
 
@@ -45,7 +45,7 @@ $(DIR_OBJS)/%.o: $(DIR_SRCS)/%.c
 
 $(NAME):	$(OBJS)
 			@printf "\n\n$(BLUE)Compiling $(NAME) ... $(RESET)"
-			@$(CC) $(CFLAGS) $(OBJS) $(INCS) -o $(NAME)
+			@$(CC) $(OBJS) $(CFLAGS) $(INCS) -o $(NAME)
 			@printf "$(GREEN)[✔]\n[$(NAME) done]$(RESET)\n\n"
 
 -include	$(DEPS)

@@ -163,6 +163,7 @@ void			init_scan_configuration(t_opt *opt, t_final_status *f_s);
 */
 
 int				check_host_availability(const char *ip_str);
+uint16_t		get_source_port();
 
 /*
 ** STATUS FUNCTIONS

@@ -97,3 +97,4 @@ sudo ./ft_nmap --ip 192.168.1.1 --scan SYN,XMAS
 sudo ./ft_nmap --ip 192.168.1.1 --speedup 50
 sudo ./ft_nmap --file targets.txt
 sudo ./ft_nmap --help
+sudo ./ft_nmap --ports 1-2 --ip 1.1.1.1 --scan UDP
