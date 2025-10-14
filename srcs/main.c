@@ -23,8 +23,11 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
         else {
             printf("Host %s is up.\n", current->data);
             struct timeval t_scan_start, t_scan_end;
-            gettimeofday(&t_scan_start, NULL); //calcul temps du/des scan
-            init_scan_configuration(opt, f_s); 
+            gettimeofday(&t_scan_start, NULL); //calcul temps du/des scans
+            if (init_scan_configuration(opt, f_s) != 0) {
+                printf("Scan failed\n");
+                return 1;
+            }
             gettimeofday(&t_scan_end, NULL);
             double total_sec = (t_scan_end.tv_sec - t_scan_start.tv_sec)
                              + (t_scan_end.tv_usec - t_scan_start.tv_usec) / 1000000.0;

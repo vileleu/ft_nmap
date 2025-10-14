@@ -98,7 +98,7 @@ int icmp_ping(const char *ip_str) {
 
 
 int check_host_availability(const char *ip_str) {
-    if (icmp_ping(ip_str) == 0) {
+    if (icmp_ping(ip_str)) {
         return 1;
     }
 

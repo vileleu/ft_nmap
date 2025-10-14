@@ -149,7 +149,7 @@ void			print_opt(t_opt *opt);
 ** INIT SCAN FUNCTIONS
 */
 
-void			init_scan_configuration(t_opt *opt, t_final_status *f_s);
+int			init_scan_configuration(t_opt *opt, t_final_status *f_s);
 
 /*
 ** CHECK HOST FUNCTIONS
