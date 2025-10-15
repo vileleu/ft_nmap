@@ -24,7 +24,7 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
             printf("Host %s is up.\n", current->data);
             struct timeval t_scan_start, t_scan_end;
             gettimeofday(&t_scan_start, NULL); //calcul temps du/des scans
-            if (init_scan_configuration(opt, f_s) != 0) {
+            if (init_scan_configuration(opt, f_s) == 1) {
                 printf("Scan failed\n");
                 return 1;
             }

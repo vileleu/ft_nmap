@@ -56,7 +56,7 @@ void *scan_thread(void *arg) {
 	}
 	scan_receive(p_data, data->final_status);
 	free_pcap_data(p_data);
-    return NULL;
+    return (void *)1;
 }
 
 pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
@@ -68,6 +68,8 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
     for (int i = 0; i < opt->thread; i++) {
         int res = pthread_create(&threads[i], NULL, scan_thread, &threads_data[i]); //scan_thread = appelle la fonction avce tous les scans
         if (res != 0) {
+            for (int j = 0; j < i; j++)
+                pthread_join(threads[j], NULL);
             free(threads);
             exit(EXIT_FAILURE);
         }
