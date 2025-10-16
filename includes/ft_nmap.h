@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:57 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/16 18:39:56 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/16 18:08:20 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <pcap.h>
+#include <sys/time.h>
 
 #define SIZE_SCAN 6
 
@@ -39,6 +40,8 @@
 #define MAX_RANGE_SCAN 1024
 #define MIN_PORT_SOURCE 30000
 #define MAX_PORT_SOURCE (MAX_PORT - MAX_RANGE_SCAN * SIZE_SCAN)
+
+#define SELECT_TIMEOUT 2
 
 #define NONE 0
 #define OPEN 1
@@ -136,7 +139,7 @@ t_opt			*parsing(const char **arg, const int len_arg);
 */
 
 t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uint16_t count, uint8_t scan[SIZE_SCAN]);
-uint8_t			scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t source, uint8_t scan[SIZE_SCAN]);
+uint8_t			scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t *source, uint8_t scan[SIZE_SCAN]);
 uint8_t			scan_receive(t_pcap_data *p_data, t_final_status *final_status);
 void			*free_pcap_data(t_pcap_data *p_data);
 

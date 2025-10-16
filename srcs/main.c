@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/08 17:26:58 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/06 19:09:10 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,31 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
     t_list_addr *current = opt->targets;
 
     while (current) {
-        // current->data contient les IP
         if (!check_host_availability(current->data)) {
             printf("Host %s is unreachable.\n", current->data);
-            return 1;
-        } else {
-            printf("Host %s is up.\n", current->data);
+            return EXIT_FAILURE;
+        } 
+        else {
+			if (create_final_status(&f_s, opt)) {
+				free_final_status(f_s);
+				free_opt(opt);
+				return EXIT_FAILURE;
+			}
+            printf("\nHost %s is up.\n", current->data);
+            struct timeval t_scan_start, t_scan_end;
+            gettimeofday(&t_scan_start, NULL); //calcul temps du/des scan
             init_scan_configuration(opt, f_s);
+            gettimeofday(&t_scan_end, NULL);
+            double total_sec = (t_scan_end.tv_sec - t_scan_start.tv_sec)
+                             + (t_scan_end.tv_usec - t_scan_start.tv_usec) / 1000000.0;
+
+            printf("Scan took %.5f secs\n", total_sec);
+			print_conclusion(f_s);
+			f_s = NULL;
         }
         current = current->next;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int main(const int ac, const char **av) {
@@ -36,11 +50,6 @@ int main(const int ac, const char **av) {
     if (!opt)
         return EXIT_FAILURE;
     print_opt(opt);
-	if (create_final_status(&final_status, opt)) {
-		free_final_status(final_status);
-		free_opt(opt);
-		return EXIT_FAILURE;
-	}
     srand(time(NULL));
     int scan_result = run_scan(opt, final_status);
     if (scan_result == 1) {
@@ -48,7 +57,6 @@ int main(const int ac, const char **av) {
         free_final_status(final_status);
         return EXIT_FAILURE;
     }
-	print_conclusion(final_status);
     free_opt(opt);
     return EXIT_SUCCESS;
 }

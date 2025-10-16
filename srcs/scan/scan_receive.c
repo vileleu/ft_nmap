@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:45:54 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/05 17:37:21 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/16 18:02:30 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ static void	packet_handler(unsigned char *arg, const struct pcap_pkthdr *packet_
 	uint16_t					packet_port_dst = 0;
 
 	(void)packet_header;
-	// packet_header->len = size of full packet (don't need it)
-    // printf("Packet capture length: %d\n", packet_header->caplen);
+	//packet_header->len = size of full packet (don't need it);
+    //printf("Packet capture length: %d\n", packet_header->caplen);
 	// skip ethernet header
 	packet = packet + sizeof(struct ether_header);
 	ip = (struct iphdr *)(packet);

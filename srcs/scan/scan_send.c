@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:49:40 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/17 18:27:36 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/06 21:24:50 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
 	t_pcap_data			*p_data = NULL;
 	pcap_if_t			*list_if = NULL;
     char				error_buffer[PCAP_ERRBUF_SIZE];
-    char				filter_exp[100];
+    char				filter_exp[200];
 	bpf_u_int32			ip_bpf = 0;
 	struct timeval		*tv_pointer = NULL;
 
@@ -78,8 +78,8 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
 	if (!(p_data->l_result = init_list_result(ports, source, scan)))
 		return (free_pcap_data(p_data));
 	// create our string filter (like tcpdump)
-	sprintf(filter_exp, "(tcp or udp or (icmp[0] = 3)) and src %s and dst portrange %u-%u", ip, source, source + count - 1);
-	// printf("filter = %s\n", filter_exp);
+	sprintf(filter_exp, "((tcp or udp) and src %s and dst portrange %u-%u) or (icmp and icmp[0] == 3 and src %s)", ip, source, source + count - 1, ip);
+	//printf("filter = %s\n", filter_exp);
 	// search device (ex: eth0)
     if (pcap_findalldevs(&list_if, error_buffer) < 0)
 		return (error_scan_pcap(p_data, "pcap_findalldevs", error_buffer));
@@ -103,14 +103,14 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
 	if ((tv_pointer = pcap_get_required_select_timeout(p_data->handle)))
 		p_data->tv = *tv_pointer;
 	else {
-		p_data->tv.tv_sec = 3;
+		p_data->tv.tv_sec = SELECT_TIMEOUT;
 		p_data->tv.tv_usec = 0;
 	}
 	p_data->nb_packet = count;
 	return (p_data);
 }
 
-uint8_t		scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t source, uint8_t scan[SIZE_SCAN]) {
+uint8_t		scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t *source, uint8_t scan[SIZE_SCAN]) {
 	t_scan_opt			scan_opt;
 	struct sockaddr_in	src;
 	int					i = 0;
@@ -136,13 +136,13 @@ uint8_t		scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t source, uint
 			return (error_scan_errno("malloc"));
     	bzero(scan_opt.packet, scan_opt.packet_size);
 		if (scan_opt.scan == UDP) {
-			if (send_udp_packet(&scan_opt, &source)) {
+			if (send_udp_packet(&scan_opt, source)) {
 				free(scan_opt.packet);
 				return (EXIT_FAILURE);
 			}
 		}
 		else {
-			if (send_tcp_packet(&scan_opt, &source)) {
+			if (send_tcp_packet(&scan_opt, source)) {
 				free(scan_opt.packet);
 				return (EXIT_FAILURE);
 			}

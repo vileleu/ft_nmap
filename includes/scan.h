@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/14 00:06:09 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/08 17:17:32 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/06 19:31:33 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ typedef struct	s_psh_udp {
 	uint8_t			placeholder;
 	uint8_t			protocol;
 	uint16_t		udp_length;
-	struct tcphdr	udphdr;
+	struct udphdr	udphdr;
 }				t_psh_udp;
 
 /*

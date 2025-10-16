@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 19:32:58 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/17 17:48:58 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/16 19:57:20 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,23 +37,20 @@ void wait_for_threads(int thread_count, pthread_t *threads) {
 }
 
 void *scan_thread(void *arg) {
-    t_thread_data *data = (t_thread_data *)arg;
-	t_pcap_data	*p_data;
+    t_thread_data	*data = (t_thread_data *)arg;
+	t_pcap_data		*p_data;
 
 	if (!(p_data = init_pcap_data(data->ip, data->ports, data->source, data->count, data->scan)))
 		return (NULL);
-	if (scan_send(&data->addr, data->ports, data->source, data->scan)) {
+	if (scan_send(&data->addr, data->ports, &data->source, data->scan) || scan_receive(p_data, data->final_status)) {
 		free_pcap_data(p_data);
 		return NULL;
 	}
-	scan_receive(p_data, data->final_status);
 	free_pcap_data(p_data);
     return NULL;
 }
 
 pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
-    // On malloc pour créer dynamiquement un tableau qui stockera les identifiants (`pthread_t`)
-    // de tous les threads pour les wait
     pthread_t *threads = malloc(sizeof(pthread_t) * opt->thread);
     if (!threads) {
         exit(EXIT_FAILURE);
@@ -128,6 +125,11 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 	uint8_t		total_scan = get_total_scan(opt->scan);
 	uint16_t	total_send = 0;
 
+    // debug
+    // printf("Répartition des ports :\n");
+    // printf("- %d ports par thread\n", base_ports_per_thread);
+    // printf("- %d thread(s) avec port supplémentaire (pour équilibrer)\n", extra_ports);
+
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
         exit(EXIT_FAILURE);
@@ -157,13 +159,13 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 }
 
 
-// crée une liste chaînée de ports à partir de l'intervalle donné pour creer ls threads
+// liste chainee intervalle
 t_list *create_list_from_range(uint16_t min, uint16_t max) {
     t_list *head = NULL;
     t_list *last_node = NULL;
 
     for (uint16_t port = min; port <= max; port++) {
-        t_list *new_node = malloc(sizeof(t_list)); //alloue dynamiquement un nouveau nœud de la liste
+        t_list *new_node = malloc(sizeof(t_list));
         if (!new_node) {
             free_port_list(head);
             exit(EXIT_FAILURE);
@@ -178,7 +180,7 @@ t_list *create_list_from_range(uint16_t min, uint16_t max) {
         new_node->next = NULL;
 
         // Si c’est le premier nœud, on initialise head.
-        //Sinon, on chaîne ce nouveau nœud à la fin de la liste.
+        //Sinon, on chaîne ce nouveau nœud à la fin de la liste
         if (!head)
             head = new_node;
         else
@@ -189,7 +191,7 @@ t_list *create_list_from_range(uint16_t min, uint16_t max) {
     return head;
 }
 
-//preparer pour allocate_thread_data
+
 t_list *prepare_all_ports(t_port *port, int total_ports) {
     if (port->isranged)
         return create_list_from_range(port->min, port->max);
@@ -197,7 +199,7 @@ t_list *prepare_all_ports(t_port *port, int total_ports) {
     if (port->islist)
         return port->list;
 
-    if (total_ports == 1) { //cree une liste de 1
+    if (total_ports == 1) { //cree une liste chainee de 1 -> cas particulier
         t_list *list = malloc(sizeof(t_list));
         if (!list) {
             free(list);
@@ -218,11 +220,11 @@ t_list *prepare_all_ports(t_port *port, int total_ports) {
 
 int get_total_ports(t_port *port) {
 
-    if (port->isranged) {//retourne le nombre total d’éléments dans la plage
+    if (port->isranged) { // plage
         return (port->max - port->min + 1);
     }
 
-    if (port->islist) { //compter les éléments de la liste chaînée
+    if (port->islist) { // liste chaînée
         int count = 0;
         t_list *tmp = port->list;
         while (tmp) {

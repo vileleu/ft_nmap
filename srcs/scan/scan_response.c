@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/31 02:35:53 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/16 18:51:59 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/06 19:59:55 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,8 +79,8 @@ void		get_response_unreach(const unsigned char *packet, t_list_result *result) {
 	const struct iphdr			*ip = (struct iphdr *)packet;
 	const struct icmphdr		*icmp = (struct icmphdr *)(packet + (ip->ihl * 4));
 	const struct iphdr			*myip = (struct iphdr *)(packet + (ip->ihl * 4 + sizeof(struct icmphdr)));
-	const struct tcphdr			*tcp = (myip->protocol == IPPROTO_TCP ? (struct tcphdr *)(packet + (sizeof(ip->ihl * 4) + sizeof(struct icmphdr) + myip->ihl * 4)) : NULL);
-	const struct udphdr			*udp = (myip->protocol == IPPROTO_UDP ? (struct udphdr *)(packet + (sizeof(ip->ihl * 4) + sizeof(struct icmphdr) + myip->ihl * 4)) : NULL);
+	const struct tcphdr			*tcp = (myip->protocol == IPPROTO_TCP ? (struct tcphdr *)(packet + (ip->ihl * 4) + sizeof(struct icmphdr) + myip->ihl * 4) : NULL);
+	const struct udphdr			*udp = (myip->protocol == IPPROTO_UDP ? (struct udphdr *)(packet + (ip->ihl * 4) + sizeof(struct icmphdr) + myip->ihl * 4) : NULL);
 	uint16_t					source = 0;
 	
 	source = (myip->protocol == IPPROTO_TCP ? ntohs(tcp->source) : source);

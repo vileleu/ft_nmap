@@ -6,7 +6,7 @@
 #    By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/17 13:36:31 by vileleu           #+#    #+#              #
-#    Updated: 2025/09/24 14:18:22 by vileleu          ###   ########.fr        #
+#    Updated: 2025/10/05 17:52:05 by vileleu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ DEPS 		= $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$(OBJS))
 
 NAME		= ft_nmap
 CC			= gcc
-CFLAGS		= -Wall -Wextra -Werror -lpcap -pthread 
+CFLAGS		= -Wall -Wextra -Werror -lpcap -pthread -fsanitize=address -g3
 OFLAGS		= -MMD -MP -MF $(patsubst $(DIR_OBJS)/%.o,$(DIR_DEPS)/%.d,$@)
 RM			= rm -rf
 

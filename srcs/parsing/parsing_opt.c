@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/22 15:48:39 by vileleu           #+#    #+#             */
-/*   Updated: 2025/08/27 14:41:36 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/16 17:50:19 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ uint8_t		get_opt_port(t_parse *parse) {
 	}
 	else {
 		if (tmp.un.nb > MAX_PORT)
-			return (error_parsing_example(parse, "port number is wrong", "(0 < port <= 1024)", parse->i + parse->skip_next));
+			return (error_parsing_example(parse, "port number is wrong", "(0 < port <= 65535)", parse->i + parse->skip_next));
 		parse->opt->port.isranged = 0;
 		parse->opt->port.port = tmp.un.nb;
 	}

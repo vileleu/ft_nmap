@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 15:56:52 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/17 16:19:11 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/05 17:56:40 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	free_final_status(t_final_status *final_status) {
 		tmp = final_status;
 		final_status = final_status->next;
 		free(tmp);
+		tmp = NULL;
 	}
 }
 
