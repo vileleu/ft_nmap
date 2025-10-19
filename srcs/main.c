@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/06 19:09:10 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/19 18:51:01 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,11 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
 			}
             printf("\nHost %s is up.\n", current->data);
             struct timeval t_scan_start, t_scan_end;
-            gettimeofday(&t_scan_start, NULL); //calcul temps du/des scan
-            init_scan_configuration(opt, f_s);
+            gettimeofday(&t_scan_start, NULL); //calcul temps du/des scans
+            if (init_scan_configuration(opt, f_s) == 1) {
+                printf("Scan failed\n");
+                return 1;
+            }
             gettimeofday(&t_scan_end, NULL);
             double total_sec = (t_scan_end.tv_sec - t_scan_start.tv_sec)
                              + (t_scan_end.tv_usec - t_scan_start.tv_usec) / 1000000.0;
@@ -44,10 +47,12 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
 }
 
 int main(const int ac, const char **av) {
-    t_opt 			*opt = parsing(av, ac);
+    t_opt 			*opt;
 	t_final_status	*final_status = NULL;
 
-    if (!opt)
+	if (getuid())
+		return (error_all("Need privileges"));
+    if (!(opt = parsing(av, ac)))
         return EXIT_FAILURE;
     print_opt(opt);
     srand(time(NULL));

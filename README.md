@@ -84,6 +84,10 @@ c) on répartit les ports par thread = Il y a 3 index, 1 pour parcourir la liste
 d) L'index pour les ports va parcourir la liste des ports jusqu'a la fin en s'incrementant selon le nombre de threads, par exemple si le nb de port a copier pour le thread 1 est de 5, "ports_for_this_thread;" est de 5 aussi donc pour continuer a copier les autres threads je vais a 5 positions plus loin dans ma liste de ports. Pour l'index "thread_index", il me permet de savoir a quel thread attribuer tel information (ip, rangee de port, option de scan)
 e) avant le remplissage au cas ou il y a un port en reste car nombre de ports impaires j'ajoute a ports_for_this_thread 1 port en plus comme ca je traite les threads contenant des ports impaires au debut
 
+DOC fonction - launch_threads :
+threads_data contient les informations que chaque thread utilisera.
+threads contient les identifiants nécessaires pour gérer les threads créés.
+
 THREADS : 
 - https://www.geeksforgeeks.org/c/multithreading-in-c/
 

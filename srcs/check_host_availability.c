@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   check_host_availability.c                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/19 18:52:04 by vileleu           #+#    #+#             */
+/*   Updated: 2025/10/19 18:52:36 by vileleu          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_nmap.h"
 
 // additionne tous les octets du paquet 2 par 2 (en mots de 16 bits) 
@@ -62,10 +74,23 @@ int prepare_icmp_packet(char *packet, size_t packet_size) {
 int init_sockaddr_in(struct sockaddr_in *addr, const char *ip_str) {
     memset(addr, 0, sizeof(*addr));
     addr->sin_family = AF_INET;
-    if (inet_pton(AF_INET, ip_str, &addr->sin_addr) != 1) {
-        fprintf(stderr, "Invalid IP address: %s\n", ip_str);
+    if (inet_pton(AF_INET, ip_str, &addr->sin_addr) == 1) {
+        return 1;
+    }
+
+    struct addrinfo hints, *res = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (getaddrinfo(ip_str, NULL, &hints, &res) != 0 || res == NULL) {
+        fprintf(stderr, "Failed to resolve: %s\n", ip_str);
         return 0;
     }
+
+    memcpy(&addr->sin_addr, &((struct sockaddr_in *)res->ai_addr)->sin_addr, sizeof(struct in_addr));
+    freeaddrinfo(res);
+
     return 1;
 }
 
@@ -97,8 +122,7 @@ int icmp_ping(const char *ip_str) {
 
 
 int check_host_availability(const char *ip_str) {
-    if (icmp_ping(ip_str) == 0) {
-        return 0;
-    }
-    return 1;
+    if (icmp_ping(ip_str))
+        return 1;
+    return 0;
 }

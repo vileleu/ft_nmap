@@ -47,7 +47,7 @@ void *scan_thread(void *arg) {
 		return NULL;
 	}
 	free_pcap_data(p_data);
-    return NULL;
+    return (void *)1;
 }
 
 pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
@@ -57,7 +57,13 @@ pthread_t *launch_threads(t_opt *opt, t_thread_data *threads_data) {
     }
 
     for (int i = 0; i < opt->thread; i++) {
-        pthread_create(&threads[i], NULL, scan_thread, &threads_data[i]); //scan_thread = appelle la fonction avce tous les scans
+        int res = pthread_create(&threads[i], NULL, scan_thread, &threads_data[i]); //scan_thread = appelle la fonction avce tous les scans
+        if (res != 0) {
+            for (int j = 0; j < i; j++)
+                pthread_join(threads[j], NULL);
+            free(threads);
+            exit(EXIT_FAILURE);
+        }
     }
 
     return threads;
@@ -132,7 +138,7 @@ t_thread_data *allocate_thread_data(t_opt *opt, t_list *all_ports, int total_por
 
     t_thread_data *threads_data = malloc(sizeof(t_thread_data) * opt->thread);
     if (!threads_data) {
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     // Répartition des ports par thread
@@ -241,16 +247,32 @@ int get_total_ports(t_port *port) {
     return 0;
 }
 
-void init_scan_configuration(t_opt *opt, t_final_status *f_s) {
+int init_scan_configuration(t_opt *opt, t_final_status *f_s) {
     int total_ports = get_total_ports(&opt->port);
-    t_list *all_ports = prepare_all_ports(&opt->port, total_ports);
-    t_thread_data *threads_data = allocate_thread_data(opt, all_ports, total_ports, f_s);
-    pthread_t *threads = launch_threads(opt, threads_data); //lancement des threads
+    if (total_ports <= 0) {
+        return 1; // aucun port a scanner
+    }
 
+    t_list *all_ports = prepare_all_ports(&opt->port, total_ports);
+    if (!all_ports) {
+        return 1; // pas de liste cree
+    }
+
+    t_thread_data *threads_data = allocate_thread_data(opt, all_ports, total_ports, f_s);
+    if (!threads_data) {
+        printf("Error: Failed to allocate thread data.\n");
+        if (opt->port.isranged || total_ports == 1)
+            free_port_list(all_ports);
+        return 1;
+    }
+    pthread_t *threads = launch_threads(opt, threads_data);
+    
     wait_for_threads(opt->thread, threads);
     cleanup_threads(opt->thread, threads, threads_data);
 
     if (opt->port.isranged || total_ports == 1) {
         free_port_list(all_ports);
     }
+
+    return 0;
 }
