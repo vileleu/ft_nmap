@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:49:40 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/06 21:24:50 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/20 19:17:06 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
     char				error_buffer[PCAP_ERRBUF_SIZE];
     char				filter_exp[200];
 	bpf_u_int32			ip_bpf = 0;
-	struct timeval		*tv_pointer = NULL;
+	const struct timeval	*tv_pointer = NULL;
 
 	if (!(p_data = malloc(sizeof(t_pcap_data)))) {
 			error_scan_errno("malloc");
