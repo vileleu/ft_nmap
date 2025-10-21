@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/20 20:37:14 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/21 11:32:58 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
     t_list_addr *current = opt->targets;
     while (current) {
         if (!check_host_availability(current->data))
-            printf("Host %s is unreachable.\n", current->data);
+            printf("\nHost %s is unreachable.\n", current->data);
         else {
 			if (create_final_status(&f_s, opt)) {
 				free_final_status(f_s);
