@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:45:54 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/16 18:02:30 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/21 16:21:29 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static void	packet_handler(unsigned char *arg, const struct pcap_pkthdr *packet_
     return;
 }
 
-uint8_t			scan_receive(t_pcap_data *p_data, t_final_status *final_status) {
+uint8_t			scan_receive(t_pcap_data *p_data) {
 	fd_set 			fds;
 	struct timeval	tv;
 	int 			ret = 0;
@@ -65,6 +65,5 @@ uint8_t			scan_receive(t_pcap_data *p_data, t_final_status *final_status) {
 		    return (error_scan_errno("select"));
 		}
 	}
-	write_conclusion(p_data->l_result, final_status);
 	return (EXIT_SUCCESS);
 }

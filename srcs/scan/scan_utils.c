@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:36:56 by vileleu           #+#    #+#             */
-/*   Updated: 2025/09/01 15:57:41 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/21 17:20:08 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ void			*free_list_result(t_list_result *list) {
 void			*free_pcap_data(t_pcap_data *p_data) {
 	if (p_data->l_result)
 		free_list_result(p_data->l_result);
+	if (p_data->fd)
+		close(p_data->fd);
 	if (p_data->filter_on)
 		pcap_freecode(&p_data->filter);
 	if (p_data->handle)

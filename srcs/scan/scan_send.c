@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 23:49:40 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/20 19:17:06 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/21 18:46:37 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,18 @@ t_pcap_data		*init_pcap_data(const char *ip, t_list *ports, uint16_t source, uin
 	return (p_data);
 }
 
-uint8_t		scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t *source, uint8_t scan[SIZE_SCAN]) {
+static uint16_t get_total_ports(t_list *ports) {
+    t_list      *tmp = ports;
+    uint16_t    size = 0;
+
+	while (tmp) {
+        size++;
+		tmp = tmp->next;
+	}
+    return size;
+}
+
+uint8_t		scan_send(t_pcap_data *p_data, struct sockaddr_in *dst, t_list *ports, uint16_t *source, uint8_t scan[SIZE_SCAN]) {
 	t_scan_opt			scan_opt;
 	struct sockaddr_in	src;
 	int					i = 0;
@@ -127,6 +138,7 @@ uint8_t		scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t *source, uin
 	if (get_local_sockaddr(scan_opt.src))
 		return (EXIT_FAILURE);
 	while (i < SIZE_SCAN && scan[i]) {
+		p_data->nb_packet = get_total_ports(ports);
 		scan_opt.scan = scan[i++];
 		if (scan_opt.scan == UDP)
 			scan_opt.packet_size = sizeof(struct iphdr) + sizeof(struct udphdr);
@@ -146,6 +158,10 @@ uint8_t		scan_send(struct sockaddr_in *dst, t_list *ports, uint16_t *source, uin
 				free(scan_opt.packet);
 				return (EXIT_FAILURE);
 			}
+		}
+		if (scan_receive(p_data)) {
+			free(scan_opt.packet);
+			return (EXIT_FAILURE);
 		}
 		free(scan_opt.packet);
 	}

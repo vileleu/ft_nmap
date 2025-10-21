@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/17 13:38:12 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/21 11:32:58 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/21 18:27:55 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ static int run_scan(t_opt *opt, t_final_status *f_s) {
                 printf("Scan took %.5f secs\n", total_sec);
 			    print_conclusion(f_s);
 			    f_s = NULL;
+                if (current->next)
+                    usleep(1000000);
             }
         }
         current = current->next;

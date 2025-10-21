@@ -6,7 +6,7 @@
 /*   By: vileleu <vileleu@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 19:32:58 by vileleu           #+#    #+#             */
-/*   Updated: 2025/10/16 19:57:20 by vileleu          ###   ########.fr       */
+/*   Updated: 2025/10/21 18:46:21 by vileleu          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,11 @@ void *scan_thread(void *arg) {
 
 	if (!(p_data = init_pcap_data(data->ip, data->ports, data->source, data->count, data->scan)))
 		return (NULL);
-	if (scan_send(&data->addr, data->ports, &data->source, data->scan) || scan_receive(p_data, data->final_status)) {
+	if (scan_send(p_data, &data->addr, data->ports, &data->source, data->scan)) {
 		free_pcap_data(p_data);
 		return NULL;
 	}
+    write_conclusion(p_data->l_result, data->final_status);
 	free_pcap_data(p_data);
     return (void *)1;
 }
